@@ -1,0 +1,247 @@
+def get_top_gainers(interval='15m', top_n=5):
+    # Binance API endpoint for historical candlestick data
+    print("running........")
+    url = "https://api.binance.com/api/v3/klines"
+
+    # Get the list of symbols from the exchange information endpoint
+    symbols_response = requests.get("https://api.binance.com/api/v3/exchangeInfo")
+    symbols = [symbol['symbol'] for symbol in symbols_response.json()['symbols']]
+
+    gainers = []
+
+    for symbol in symbols:
+        params = {
+            'symbol': symbol,
+            'interval': interval,
+            'limit': 1  # We only need the latest candlestick
+        }
+
+        response = requests.get(url, params=params)
+
+        if response.status_code == 200:
+            data = response.json()
+
+            if data and len(data) > 0:
+                open_price = float(data[0][1])
+                close_price = float(data[0][4])
+                percent_change = ((close_price - open_price) / open_price) * 100
+                gainers.append((symbol, percent_change))
+
+    # Sort the symbols by their percentage price change
+    top_gainers = sorted(gainers, key=lambda x: x[1], reverse=True)
+
+    # Return the top N gainers
+    return top_gainers[:top_n]
+
+
+
+# Get and print the top gainers for the 15-minute interval
+top_gainers_15m = get_top_gainers('15m', 5)
+print(top_gainers_15m)
+
+async def binance_ws(symbols, collection):
+    print(f"Subscribing to symbols: {symbols}")
+    streams = [f"{symbol.lower()}@ticker" for symbol in symbols]
+    stream_url = f"wss://stream.binance.com:9443/stream?streams={'/'.join(streams)}"
+    print(stream_url)
+    print("Attempting to connect to WebSocket")  # Log WebSocket connection attempt
+    
+    async with websockets.connect(stream_url) as websocket:
+        print(f"Connected to WebSocket with symbols: {symbols}")
+        while True:
+            message = await websocket.recv()
+            print(f"Received message: {message}")  # Log each received message
+            await handle_message(message, collection)
+
+************************************
+import json
+import asyncio
+import websockets
+import os
+import pymongo
+import requests
+import time
+from pymongo import MongoClient
+from dotenv import load_dotenv
+from datetime import datetime, timedelta
+
+
+# Load environment variables from .env file
+load_dotenv()
+
+database_url = os.environ.get('database_url')
+
+# MongoDB setup
+client = pymongo.MongoClient(database_url)
+db = client["binance"]
+collection = db["binance_gainers_15m"]
+
+def test_mongodb_connection():
+    try:
+        # Attempt to fetch a small amount of data
+        # Connect to MongoDB
+        client = MongoClient(database_url)
+        db = client["binance"]  # Database name
+        collection = db["binance_gainers_15m"]  # Collection name
+        one_doc = collection.find_one()
+        print("Successfully connected to MongoDB. Document found:", one_doc)
+    except Exception as e:
+        print("Failed to connect to MongoDB:", e)
+
+def fetch_all_binance_symbols():
+    print("Fetching all Binance symbols...")
+    url = "https://api.binance.com/api/v3/exchangeInfo"
+    response = requests.get(url)
+    data = response.json()
+    symbols = [symbol['symbol'] for symbol in data['symbols'] if 'USDT' in symbol['symbol']]
+    print(f"Fetched {len(symbols)} symbols.")
+    return symbols
+
+
+async def handle_message(message, collection):
+    """
+    Process each WebSocket message. Update existing data in MongoDB or insert new data.
+    """
+    print("Message received: ", message)
+    try:
+        data = json.loads(message)
+        symbol = data['data']['s']
+        price = float(data['data']['c'])
+        timestamp = datetime.utcfromtimestamp(data['data']['E'] / 1000.0)
+
+        # Log the received message
+        print(f"Message received for {symbol}: Price: {price}, Timestamp: {timestamp}")
+
+        # Check if a record for the symbol already exists
+        existing_record = collection.find_one({"symbol": symbol})
+
+        if existing_record:
+            # Update the existing record
+            collection.update_one(
+                {"symbol": symbol},
+                {"$set": {
+                    "price": price,
+                    "timestamp": timestamp
+                }}
+            )
+            print(f"Updated record for {symbol}")
+        else:
+            # Insert a new record
+            collection.insert_one({
+                "symbol": symbol,
+                "price": price,
+                "timestamp": timestamp
+            })
+            print(f"Inserted new record for {symbol}")
+    except Exception as e:
+        print(f"Error processing message: {e}")
+
+
+async def binance_ws(symbols, collection, interval=5):  # 300 seconds = 5 minutes
+    """
+    Establish WebSocket connection with Binance and process messages every 5 minutes.
+    """
+    print("Establishing WebSocket connection...")
+    try:
+        last_process_time = time.time()
+        stream_url = f"wss://stream.binance.com:9443/stream?streams={'/'.join([f'{symbol.lower()}@ticker' for symbol in symbols])}"
+
+        async with websockets.connect(stream_url) as websocket:
+            while True:
+                message = await websocket.recv()
+                current_time = time.time()
+
+                if current_time - last_process_time >= interval:
+                    await handle_message(message, collection)
+                    last_process_time = current_time
+    except Exception as e:
+        print(f"Error processing message: {e}")
+
+
+def calculate_top_gainers(top_n=10):
+    print("Calculating top gainers...")
+    # Define the time range for the 15-minute interval
+    end_time = datetime.utcnow()
+    start_time = end_time - timedelta(minutes=15)
+
+    # MongoDB aggregation pipeline
+    pipeline = [
+        {"$match": {"timestamp": {"$gte": start_time, "$lte": end_time}}},
+        {"$group": {"_id": "$symbol", "startPrice": {"$first": "$price"}, "endPrice": {"$last": "$price"}}},
+        {"$project": {
+            "symbol": "$_id",
+            "_id": 0,
+            "priceChangePercent": {
+                "$multiply": [
+                    {"$divide": [
+                        {"$subtract": ["$endPrice", "$startPrice"]},
+                        "$startPrice"
+                    ]},
+                    100
+                ]
+            }
+        }},
+        {"$sort": {"priceChangePercent": -1}},  # Sort by descending order of price change
+        {"$limit": top_n}  # Limit to top N gainers
+    ]
+
+    # Execute the aggregation pipeline
+    top_gainers = list(collection.aggregate(pipeline))
+
+    # Return the top gainers
+    print(f"Top gainers: {top_gainers}")
+    return top_gainers
+
+def cleanup_old_data(days_old=30):
+    """
+    Delete records from the collection that are older than the specified number of days.
+    """
+    # Calculate the cutoff date
+    cutoff_date = datetime.utcnow() - timedelta(days=days_old)
+
+    # Delete documents older than the cutoff date
+    result = collection.delete_many({"timestamp": {"$lt": cutoff_date}})
+    print(f"Deleted {result.deleted_count} old records.")
+
+async def main():
+    print("Starting main function...")
+    # Fetch all symbols from Binance
+    all_symbols = fetch_all_binance_symbols()
+
+    # Start the WebSocket connection with all symbols
+    ws_task = asyncio.create_task(binance_ws(all_symbols, collection))
+
+    # Initial wait period to collect some data (adjust as needed)
+    await asyncio.sleep(10)  # 5 minutes (300 seconds)
+
+    while True:
+        try:
+            # Calculate top gainers
+            top_gainers = calculate_top_gainers(top_n=10)
+            top_gainer_symbols = [item['symbol'] for item in top_gainers]
+
+            if top_gainer_symbols:
+                # Cancel the existing WebSocket task and start a new one with updated symbols
+                print(f"Subscribing to symbols: {top_gainer_symbols}")
+                ws_task.cancel()
+                try:
+                    await ws_task
+                except asyncio.CancelledError:
+                    print("Cancelled existing WebSocket task.")
+
+                ws_task = asyncio.create_task(binance_ws(top_gainer_symbols, collection))
+
+        except Exception as e:
+            print(f"Error occurred: {e}")
+
+        # Wait for the next interval
+        await asyncio.sleep(900)  # 15 minutes
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+
+
+
+# cleanup_old_data(days_old=1)
+
