@@ -245,3 +245,27 @@ if __name__ == "__main__":
 
 # cleanup_old_data(days_old=1)
 
+#for top 1 price increase
+async def analyze_top_gainer_and_order_book(top_gainers):
+    if not top_gainers:
+        print("No top gainers to analyze.")
+        return None
+
+    # Pick the top gainer with the highest price increase
+    top_gainer = max(top_gainers, key=lambda x: x['priceChangePercent'])
+    symbol = top_gainer['symbol']
+
+    # Fetch order book data
+    order_book = fetch_order_book(symbol)
+
+    # Analyze the order book
+    order_book_trend = analyze_order_book(order_book)
+
+    # Generate the result dictionary
+    result = {
+        "symbol": symbol,
+        "price_increase_percentage": top_gainer['priceChangePercent'],
+        "orderbook": order_book_trend,
+    }
+    print(result)
+    return result

@@ -1,10 +1,15 @@
-{'symbol': 'MANTAUSDT', 'priceChangePercent': 3.657096605246872}
-{'symbol': 'SANTOSUSDT', 'priceChangePercent': 2.341597796143246}
-{'symbol': 'GNOUSDT', 'priceChangePercent': 1.7966903073286105}
-{'symbol': 'VANRYUSDT', 'priceChangePercent': 1.2500000000000047}
-{'symbol': 'SUPERUSDT', 'priceChangePercent': 1.0609226812409662}
-{'symbol': 'FTTUSDT', 'priceChangePercent': 1.0358565737051777}
-{'symbol': 'BTCUPUSDT', 'priceChangePercent': 0.943396226415083}
-{'symbol': 'PEPEUSDT', 'priceChangePercent': 0.869565217391296}
-{'symbol': 'SUIUSDT', 'priceChangePercent': 0.7347352419559288}
-{'symbol': 'NTRNUSDT', 'priceChangePercent': 0.6968362034441452}
+File created on: 2024-01-21 15:18:18
+Total unique symbols: 387
+
+Symbol: OGNUSDT, Start Price: 0.1767, Start Time: 2024-01-21 08:08:04.206000, End Price: 0.1807, End Time: 2024-01-21 08:18:16.932000, Price Change (%): 2.2637238256932672
+Symbol: XEMUSDT, Start Price: 0.04658, Start Time: 2024-01-21 08:08:09.013000, End Price: 0.04729, End Time: 2024-01-21 08:18:16.724000, Price Change (%): 1.524259338771995
+Symbol: ACEUSDT, Start Price: 8.3656, Start Time: 2024-01-21 08:03:20.984000, End Price: 8.4356, End Time: 2024-01-21 08:18:17.411000, Price Change (%): 0.8367600650282142
+Symbol: SUSHIUSDT, Start Price: 1.162, Start Time: 2024-01-21 08:13:19.611000, End Price: 1.169, End Time: 2024-01-21 08:18:17.535000, Price Change (%): 0.6024096385542269
+Symbol: PROSUSDT, Start Price: 0.5066, Start Time: 2024-01-21 08:03:18.540000, End Price: 0.5089, End Time: 2024-01-21 08:18:17.477000, Price Change (%): 0.4540071061981778
+Symbol: MANTAUSDT, Start Price: 2.45187, Start Time: 2024-01-21 08:03:18.785000, End Price: 2.45752, End Time: 2024-01-21 08:13:10.450000, Price Change (%): 0.23043636081848365
+Symbol: MBOXUSDT, Start Price: 0.3193, Start Time: 2024-01-21 08:08:21.273000, End Price: 0.3197, End Time: 2024-01-21 08:18:13.679000, Price Change (%): 0.1252740369558445
+Symbol: PEOPLEUSDT, Start Price: 0.03411, Start Time: 2024-01-21 08:08:05.682000, End Price: 0.03415, End Time: 2024-01-21 08:18:16.724000, Price Change (%): 0.11726766344180115
+Symbol: USTCUSDT, Start Price: 0.02696781, Start Time: 2024-01-21 08:03:18.186000, End Price: 0.02697253, End Time: 2024-01-21 08:18:17.583000, Price Change (%): 0.017502348169922563
+Symbol: DGBUSDT, Start Price: 0.00819, Start Time: 2024-01-21 08:08:09.455000, End Price: 0.00819, End Time: 2024-01-21 08:12:45.177000, Price Change (%): 0.0
+latest top gainers in database: {'_id': ObjectId('65acd34ae8d61700209db03e'), 'startPrice': 0.1767, 'endPrice': 0.1807, 'startTime': '2024-01-21 08:08:04.206000', 'endTime': '2024-01-21 08:18:16.932000', 'symbol': 'OGNUSDT', 'priceChangePercent': 2.2637238256932672, 'recordedAt': datetime.datetime(2024, 1, 21, 8, 18, 18, 51000)}
+

@@ -8,17 +8,28 @@ import time
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from aiogram import Bot
+from telegram import send_telegram_message
+from orderbook_analysis import fetch_order_book, analyze_order_book
+
 
 
 # Load environment variables from .env file
 load_dotenv()
 
 database_url = os.environ.get('database_url')
+telegram_chat_id = os.environ.get('YOUR_CHAT_ID')
+telegram_bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+
+print(f"telegram_chat_id: {telegram_chat_id}")
+print(f"telegram_bot_token: {telegram_bot_token}")
+
 
 # MongoDB setup
 client = pymongo.MongoClient(database_url)
 db = client["binance"]
-collection = db["binance_gainers_15m"]
+collection = db["binance_gainers_15m"]# to store websocket data
+collection_selected_gainers = db["selected_gainers"]
 
 def test_mongodb_connection():
     try:
@@ -46,7 +57,7 @@ async def handle_message(message, collection):
     """
     Process each WebSocket message. Update existing data in MongoDB or insert new data.
     """
-    print("Message received: ", message)
+    # print("Message received: ", message)
     try:
         data = json.loads(message)
         symbol = data['data']['s']
@@ -54,7 +65,7 @@ async def handle_message(message, collection):
         timestamp = datetime.utcfromtimestamp(data['data']['E'] / 1000.0)
 
         # Log the received message
-        print(f"Message received for {symbol}: Price: {price}, Timestamp: {timestamp}")
+        # print(f"Message received for {symbol}: Price: {price}, Timestamp: {timestamp}")
 
         collection.insert_one({
         "symbol": symbol,
@@ -62,7 +73,7 @@ async def handle_message(message, collection):
         "timestamp": timestamp
         })
 
-        print(f"Inserted new record for {symbol} at {timestamp}")
+        # print(f"Inserted new record for {symbol} at {timestamp}")
 
     except Exception as e:
         print(f"Error processing message: {e}")
@@ -105,10 +116,20 @@ def calculate_top_gainers(top_n=10):
     # MongoDB aggregation pipeline
     pipeline = [
         {"$match": {"timestamp": {"$gte": start_time, "$lte": end_time}}},
-        {"$group": {"_id": "$symbol", "startPrice": {"$first": "$price"}, "endPrice": {"$last": "$price"}}},
+        {"$group": {
+            "_id": "$symbol", 
+            "startPrice": {"$first": "$price"},
+            "endPrice": {"$last": "$price"},
+            "startTime": {"$first": "$timestamp"},
+            "endTime": {"$last": "$timestamp"}
+        }},
         {"$project": {
             "symbol": "$_id",
             "_id": 0,
+            "startPrice": 1,
+            "endPrice": 1,
+            "startTime": 1,
+            "endTime": 1,
             "priceChangePercent": {
                 "$multiply": [
                     {"$divide": [
@@ -125,6 +146,11 @@ def calculate_top_gainers(top_n=10):
 
     # Execute the aggregation pipeline
     top_gainers = list(collection.aggregate(pipeline))
+
+    # Format startTime and endTime as strings
+    for gainer in top_gainers:
+        gainer['startTime'] = gainer['startTime'].strftime("%Y-%m-%d %H:%M:%S.%f")
+        gainer['endTime'] = gainer['endTime'].strftime("%Y-%m-%d %H:%M:%S.%f")
 
     # Return the top gainers
     print(f"Top gainers: {top_gainers}")
@@ -155,15 +181,108 @@ def count_records(collection):
 
 def write_top_gainers_to_file(top_gainers, filename="top_gainers.txt"):
     """
-    Write the list of top gainers to a text file.
+    Write the list of top gainers, the count of unique symbols, and the timestamp of file creation to a text file with detailed information.
     """
     try:
         with open(filename, 'w') as file:
+            # Write the timestamp of file creation
+            current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            file.write(f"File created on: {current_timestamp}\n")
+
+            # Count unique symbols and write to the file
+            unique_symbol_count = count_unique_symbols(collection)
+            file.write(f"Total unique symbols: {unique_symbol_count}\n\n")
+
+            # Write top gainers' information
             for gainer in top_gainers:
-                file.write(f"{gainer}\n")
+                file.write(f"Symbol: {gainer['symbol']}, Start Price: {gainer['startPrice']}, Start Time: {gainer['startTime']}, End Price: {gainer['endPrice']}, End Time: {gainer['endTime']}, Price Change (%): {gainer['priceChangePercent']}\n")
+
+            # Write latest top gainers in database
+            latest_top_gainers = get_latest_top_gainers()
+            file.write(f"latest top gainers in database: {latest_top_gainers}\n\n")
+
         print(f"Top gainers successfully written to {filename}")
     except Exception as e:
         print(f"Error writing to file: {e}")
+
+def count_unique_symbols(collection):
+    try:
+        pipeline = [
+            {"$group": {"_id": "$symbol"}},
+            {"$count": "unique_symbols_count"}
+        ]
+        result = list(collection.aggregate(pipeline))
+        if result:
+            count = result[0]["unique_symbols_count"]
+            print(f"Total unique symbols: {count}")
+            return count
+        else:
+            print("No unique symbols found.")
+            return 0
+    except Exception as e:
+        print(f"Error while counting unique symbols: {e}")
+        return None
+
+def record_top_gainers(top_gainers):
+    """
+    Record the top gainers into MongoDB with a timestamp.
+    """
+    try:
+        if not top_gainers:
+            print("No top gainers data to record.")
+            return
+
+        timestamp = datetime.utcnow()
+        for gainer in top_gainers:
+            gainer['recordedAt'] = timestamp  # Add timestamp to each top gainer
+            collection_selected_gainers.insert_one(gainer)
+
+        print(f"Recorded {len(top_gainers)} top gainers at {timestamp}")
+    except Exception as e:
+        print(f"Error while counting unique symbols: {e}")
+
+def get_latest_top_gainers():
+    """
+    Get the latest top gainers record from the database.
+    """
+    try:
+        latest_record = collection_selected_gainers.find().sort("recordedAt", -1).limit(1)
+        for record in latest_record:
+            return record
+    except Exception as e:
+        print(f"Error retrieving latest top gainers: {e}")
+        return None
+
+async def analyze_all_gainers_order_book(top_gainers):
+    if not top_gainers:
+        print("No top gainers to analyze.")
+        return []
+
+    results = []
+
+    for gainer in top_gainers:
+        symbol = gainer['symbol']
+
+        # Fetch order book data
+        order_book = fetch_order_book(symbol)
+
+        # Analyze the order book
+        order_book_trend = analyze_order_book(order_book)
+
+        # Generate the result dictionary for each symbol
+        result = {
+            "symbol": symbol,
+            "price_increase_percentage": gainer['priceChangePercent'],
+            "orderbook": order_book_trend
+        }
+        results.append(result)
+
+    for res in results:
+        print(res)
+
+    return results
+
+
 
 async def main():
     print("Starting main function...")
@@ -172,6 +291,9 @@ async def main():
 
     # Start the WebSocket connection with all symbols
     ws_task = asyncio.create_task(binance_ws(all_symbols, collection))
+
+    # Initialize and pass the bot instance
+    bot = Bot(token=telegram_bot_token)
 
     # Initial wait period to collect some data
     await asyncio.sleep(120)  # 5 minutes (300 seconds)
@@ -189,8 +311,26 @@ async def main():
 
             # Calculate top gainers
             top_gainers = calculate_top_gainers(top_n=10)
+            record_top_gainers(top_gainers)
             write_top_gainers_to_file(top_gainers)
             top_gainer_symbols = [item['symbol'] for item in top_gainers]
+
+            # Analyze the top gainer and its order book
+            
+            top_gainer_analysis = await analyze_all_gainers_order_book(top_gainers)
+        
+            # Format and send the analysis to Telegram
+            if top_gainer_analysis:
+                formatted_message = "Top Gainers Analysis:\n"
+                for analysis in top_gainer_analysis:
+                    formatted_message += f"\nSymbol: {analysis['symbol']}\n" \
+                                         f"Price Increase (%): {analysis['price_increase_percentage']:.2f}\n" \
+                                         f"Order Book Trend: {analysis['orderbook'][0]}\n" \
+                                         f"Ratio: {list(analysis['orderbook'][1].keys())[0]} {analysis['orderbook'][1][list(analysis['orderbook'][1].keys())[0]]:.2f}\n"
+                await send_telegram_message(bot, telegram_chat_id, formatted_message)
+            else:
+                print("No analysis to send.")
+
 
             if top_gainer_symbols:
                 # Cancel the existing WebSocket task and start a new one with updated symbols
@@ -207,13 +347,8 @@ async def main():
             print(f"Error occurred: {e}")
 
         # Wait for the next interval
-        await asyncio.sleep(240)  # 15 minutes
+        await asyncio.sleep(300)  # 5 minutes
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-# print(count_records(collection))
-
-
-# cleanup_old_data(hours_old=0)
 
