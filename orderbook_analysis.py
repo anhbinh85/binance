@@ -42,37 +42,6 @@ def analyze_order_book(order_book):
     return trend, ratio_dict
 
 
-def estimate_price_movement(top_gainers):
-    """
-    Estimate price movement for the symbol with the highest price increase.
-    """
-    if not top_gainers:
-        print("No top gainers data available.")
-        return None
-
-    # Assume top_gainers is a list of dictionaries with 'symbol' and 'priceChangePercent' keys
-    top_symbol = max(top_gainers, key=lambda x: x['priceChangePercent'])
-    symbol = top_symbol['symbol']
-    print(f"Analyzing symbol: {symbol}")
-
-    order_book = fetch_order_book(symbol)
-    analysis, ratio_dict = analyze_order_book(order_book)
-
-    # Handling missing key error
-    try:
-        ratio_type = "bid/ask" if "ratio bid/ask" in ratio_dict else "ask/bid"
-        ratio_value = ratio_dict.get("ratio bid/ask", 1.0)
-        print(f"Estimated price movement for {symbol}: {analysis}. Ratio ({ratio_type}): {ratio_value:.2f}")
-    except KeyError as e:
-        print(f"Error occurred: missing key {e}")
-        return None
-
-    return {
-        "symbol": symbol,
-        "analysis": analysis,
-        "ratio_type": ratio_type,
-        "ratio_value": ratio_value
-    }
 
 
 

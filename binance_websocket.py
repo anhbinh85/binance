@@ -9,8 +9,9 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from aiogram import Bot
-from telegram import send_telegram_message
+from telegram import send_telegram_message, format_message
 from orderbook_analysis import fetch_order_book, analyze_order_book
+from candle_stick_analysis import fetch_historical_data, estimate_price_movement
 
 
 
@@ -21,8 +22,8 @@ database_url = os.environ.get('database_url')
 telegram_chat_id = os.environ.get('YOUR_CHAT_ID')
 telegram_bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
 
-print(f"telegram_chat_id: {telegram_chat_id}")
-print(f"telegram_bot_token: {telegram_bot_token}")
+# print(f"telegram_chat_id: {telegram_chat_id}")
+# print(f"telegram_bot_token: {telegram_bot_token}")
 
 
 # MongoDB setup
@@ -261,7 +262,10 @@ async def analyze_all_gainers_order_book(top_gainers):
     results = []
 
     for gainer in top_gainers:
+
         symbol = gainer['symbol']
+
+        interval = "15m"
 
         # Fetch order book data
         order_book = fetch_order_book(symbol)
@@ -269,11 +273,19 @@ async def analyze_all_gainers_order_book(top_gainers):
         # Analyze the order book
         order_book_trend = analyze_order_book(order_book)
 
+        # Fetch Historical data
+        historical_data = fetch_historical_data(symbol, interval)
+
+        # Estimate price movement
+
+        price_movement = estimate_price_movement(symbol, interval, order_book)
+
         # Generate the result dictionary for each symbol
         result = {
             "symbol": symbol,
             "price_increase_percentage": gainer['priceChangePercent'],
-            "orderbook": order_book_trend
+            "orderbook": order_book_trend,
+            "price_movement": price_movement
         }
         results.append(result)
 
@@ -320,16 +332,13 @@ async def main():
             top_gainer_analysis = await analyze_all_gainers_order_book(top_gainers)
         
             # Format and send the analysis to Telegram
-            if top_gainer_analysis:
-                formatted_message = "Top Gainers Analysis:\n"
-                for analysis in top_gainer_analysis:
-                    formatted_message += f"\nSymbol: {analysis['symbol']}\n" \
-                                         f"Price Increase (%): {analysis['price_increase_percentage']:.2f}\n" \
-                                         f"Order Book Trend: {analysis['orderbook'][0]}\n" \
-                                         f"Ratio: {list(analysis['orderbook'][1].keys())[0]} {analysis['orderbook'][1][list(analysis['orderbook'][1].keys())[0]]:.2f}\n"
+            
+            formatted_message = format_message(top_gainer_analysis)
+            
+            try:
                 await send_telegram_message(bot, telegram_chat_id, formatted_message)
-            else:
-                print("No analysis to send.")
+            except Exception as e:
+                print(f"Error occurred in sending telegram: {e}")
 
 
             if top_gainer_symbols:
