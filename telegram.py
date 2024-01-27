@@ -32,6 +32,7 @@ def format_message(message):
                         f"Uptrend Signals: {data['price_movement']['Uptrend_Signals']}\n"
                         f"Downtrend Signals: {data['price_movement']['Downtrend_Signals']}\n"
                         f"Final Decision: {'Increase' if data['price_movement']['Final_Decision'] == 1 else 'Decrease' if data['price_movement']['Final_Decision'] == -1 else 'Neutral'}\n"
+                        f"Trading Signals: {data['trading_signal']}\n"
                     )
 
                 return formatted_message

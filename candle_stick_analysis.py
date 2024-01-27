@@ -131,6 +131,7 @@ def estimate_price_movement(symbol, interval, order_book):
 
     # Return a dictionary with all the data
     return {
+        'Symbol':symbol,
         'RSI': rsi,
         'MACD_Current': macd_current,
         'MACDSignal_Current': macdsignal_current,

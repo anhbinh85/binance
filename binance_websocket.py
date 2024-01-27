@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from aiogram import Bot
 from telegram import send_telegram_message, format_message
+from trading_logic import trading_decision_based_on_conditions
 from orderbook_analysis import fetch_order_book, analyze_order_book
 from candle_stick_analysis import fetch_historical_data, estimate_price_movement
 
@@ -280,12 +281,15 @@ async def analyze_all_gainers_order_book(top_gainers):
 
         price_movement = estimate_price_movement(symbol, interval, order_book)
 
+        trading_signal = trading_decision_based_on_conditions(price_movement)
+
         # Generate the result dictionary for each symbol
         result = {
             "symbol": symbol,
             "price_increase_percentage": gainer['priceChangePercent'],
             "orderbook": order_book_trend,
-            "price_movement": price_movement
+            "price_movement": price_movement,
+            "trading_signal": trading_signal
         }
         results.append(result)
 
