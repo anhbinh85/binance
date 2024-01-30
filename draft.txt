@@ -269,3 +269,240 @@ async def analyze_top_gainer_and_order_book(top_gainers):
     }
     print(result)
     return result
+
+def estimate_price_movement(symbol, interval, order_book):
+    """
+    Estimate price movement based on technical indicators and order book analysis.
+    Returns 1 for estimated increase, -1 for decrease, and 0 for no clear signal.
+    """
+    # Step 1: Fetch historical price data
+    historical_data = fetch_historical_data(symbol, interval)
+
+    # Check if historical data is sufficient
+    if historical_data is None or len(historical_data) < 50:  # Ensure enough data for analysis
+        return 0
+
+    # Convert historical data to a DataFrame
+    df = pd.DataFrame(historical_data)
+
+    # Define the indicators to be calculated
+    indicator_strategy = ta.Strategy(
+        name="Basic Indicators",
+        description="SMA 14, EMA 14, RSI 14, MACD",
+        ta=[
+            {"kind": "sma", "length": 14},
+            {"kind": "ema", "length": 14},
+            {"kind": "rsi", "length": 14},
+            {"kind": "macd", "fast": 12, "slow": 26, "signal": 9}
+        ]
+    )
+
+    # Apply the strategy to the DataFrame
+    df.ta.strategy(indicator_strategy)
+
+    # Ensure the indicators are calculated
+    if 'SMA_14' not in df or 'EMA_14' not in df:
+        print("Required indicators not calculated.")
+        return 0
+
+    # Get the latest values
+    latest_close = df['close'].iloc[-1]
+    sma = df['SMA_14'].iloc[-1]
+    ema = df['EMA_14'].iloc[-1]
+    rsi = df['RSI_14'].iloc[-1]
+    macd_current = df['MACD_12_26_9'].iloc[-1]
+    macdsignal_current = df['MACDs_12_26_9'].iloc[-1]
+
+    # Step 3: Order book analysis for bid/ask ratio
+    bid_volume = sum(float(bid[1]) for bid in order_book['bids'])
+    ask_volume = sum(float(ask[1]) for ask in order_book['asks'])
+    bid_ask_ratio = bid_volume / ask_volume
+
+    # Step 4: Combine signals
+    uptrend_signals = 0
+    downtrend_signals = 0
+
+    # Check price against moving averages
+    if latest_close > sma and latest_close > ema:
+        uptrend_signals += 1
+    elif latest_close < sma and latest_close < ema:
+        downtrend_signals += 1
+
+    # Check RSI
+    if rsi > 70:
+        downtrend_signals += 1
+    elif rsi < 30:
+        uptrend_signals += 1
+
+    # Check MACD
+    if macd_current > macdsignal_current:
+        uptrend_signals += 1
+    elif macd_current < macdsignal_current:
+        downtrend_signals += 1
+
+    # Check Bid/Ask Ratio
+    if bid_ask_ratio > 1:
+        uptrend_signals += 1
+    elif bid_ask_ratio < 1:
+        downtrend_signals += 1
+
+    # Final decision
+    decision = 0
+    if uptrend_signals > downtrend_signals:
+        decision = 1
+    elif downtrend_signals > uptrend_signals:
+        decision = -1
+
+    # Return a dictionary with all the data
+    return {
+        'Symbol':symbol,
+        'RSI': rsi,
+        'MACD_Current': macd_current,
+        'MACDSignal_Current': macdsignal_current,
+        'Bid_Ask_Ratio': bid_ask_ratio,
+        'Uptrend_Signals': uptrend_signals,
+        'Downtrend_Signals': downtrend_signals,
+        'Final_Decision': decision
+    }
+
+
+    def trading_decision_based_on_conditions(data):
+    '''
+    Aggressive trading strategy based on RSI and MACD signals.
+    1 indicates a buy or enter position (long).
+    0 indicates a hold or no action.
+    -1 indicates a sell or exit position (short).
+    '''
+    symbol = data['Symbol']
+    rsi = data['RSI']
+    macd = data['MACD_Current']
+    macd_signal = data['MACDSignal_Current']
+
+    # Initial decision setup
+    decision = {
+        "Symbol": symbol,
+        "Spot Trading": 0,
+        "Long Position": 0,
+        "Short Position": 0
+    }
+
+    # More aggressive RSI-based decision
+    if rsi > 60:  # Lowering threshold for overbought condition
+        decision["Spot Trading"] = -1
+        decision["Short Position"] = 1
+
+    elif rsi < 40:  # Lowering threshold for oversold condition
+        decision["Spot Trading"] = 1
+        decision["Long Position"] = 1
+
+    # Aggressive MACD-based refinement
+    if macd < macd_signal and rsi > 50:  # Bearish MACD, not oversold
+        decision["Short Position"] = 1
+
+    elif macd > macd_signal and rsi < 50:  # Bullish MACD, not overbought
+        decision["Long Position"] = 1
+
+    return decision
+
+
+def estimate_price_movement(symbol, interval, order_book):
+    """
+    Estimate price movement based on technical indicators, Bollinger Bands, and order book analysis.
+    """
+    # Fetch historical price data
+    historical_data = fetch_historical_data(symbol, interval)
+
+    if historical_data is None or len(historical_data) < 50:
+        return 0
+
+    # Convert historical data to a DataFrame
+    df = pd.DataFrame(historical_data)
+
+    # Define the indicators to be calculated
+    custom_strategy = ta.Strategy(
+        name="Custom Strategy",
+        description="SMA 14, EMA 14, RSI 14, MACD, and Bollinger Bands",
+        ta=[
+            {"kind": "sma", "length": 14},
+            {"kind": "ema", "length": 14},
+            {"kind": "rsi", "length": 14},
+            {"kind": "macd", "fast": 12, "slow": 26, "signal": 9},
+            {"kind": "bbands", "length": 20}
+        ]
+    )
+
+    # Apply the strategy to the DataFrame
+    df.ta.strategy(custom_strategy)
+
+    # Get the latest values
+    latest_close = df['close'].iloc[-1]
+    sma = df['SMA_14'].iloc[-1]
+    ema = df['EMA_14'].iloc[-1]
+    rsi = df['RSI_14'].iloc[-1]
+    macd_current = df['MACD_12_26_9'].iloc[-1]
+    macdsignal_current = df['MACDs_12_26_9'].iloc[-1]
+    upper_band = df['BBL_20_2.0'].iloc[-1]
+    lower_band = df['BBU_20_2.0'].iloc[-1]
+
+    # Order book analysis for bid/ask ratio
+    bid_volume = sum(float(bid[1]) for bid in order_book['bids'])
+    ask_volume = sum(float(ask[1]) for ask in order_book['asks'])
+    bid_ask_ratio = bid_volume / ask_volume
+
+    # Bollinger Bands Signals
+    bb_signal = 0
+    if latest_close > upper_band:
+        bb_signal = -1  # Price might be overbought
+    elif latest_close < lower_band:
+        bb_signal = 1  # Price might be oversold
+
+    # Combine signals
+    uptrend_signals = 0
+    downtrend_signals = 0
+
+    # Check price against moving averages
+    if latest_close > sma and latest_close > ema:
+        uptrend_signals += 1
+    elif latest_close < sma and latest_close < ema:
+        downtrend_signals += 1
+
+    # Check RSI
+    if rsi > 70:
+        downtrend_signals += 1
+    elif rsi < 30:
+        uptrend_signals += 1
+
+    # Check MACD
+    if macd_current > macdsignal_current:
+        uptrend_signals += 1
+    elif macd_current < macdsignal_current:
+        downtrend_signals += 1
+
+    # Check Bid/Ask Ratio
+    if bid_ask_ratio > 1:
+        uptrend_signals += 1
+    elif bid_ask_ratio < 1:
+        downtrend_signals += 1
+
+    # Incorporating Bollinger Band signals
+    if bb_signal == 1:
+        uptrend_signals += 1
+    elif bb_signal == -1:
+        downtrend_signals += 1
+
+    # Final decision
+    decision = 1 if uptrend_signals > downtrend_signals else -1 if downtrend_signals > uptrend_signals else 0
+
+    return {
+        'Symbol': symbol,
+        'RSI': rsi,
+        'MACD_Current': macd_current,
+        'MACDSignal_Current': macdsignal_current,
+        'Bid_Ask_Ratio': bid_ask_ratio,
+        'Uptrend_Signals': max(uptrend_signals, 0),  # Ensure signal count doesn't go negative
+        'Downtrend_Signals': max(downtrend_signals, 0),
+        'Bollinger_Upper': upper_band,
+        'Bollinger_Lower': lower_band,
+        'Bollinger_Signal': bb_signal,
+        'Final_Decision': decision
+        }

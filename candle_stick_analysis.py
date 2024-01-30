@@ -46,63 +46,58 @@ def fetch_historical_data(symbol, interval):
         print(f"Error fetching historical data: {e}")
         return None
 
+def calculate_macd(df, fast_period=12, slow_period=26, signal_period=9):
+    df['EMA_Fast'] = df['close'].ewm(span=fast_period, adjust=False).mean()
+    df['EMA_Slow'] = df['close'].ewm(span=slow_period, adjust=False).mean()
+    df['MACD'] = df['EMA_Fast'] - df['EMA_Slow']
+    df['MACD_Signal'] = df['MACD'].ewm(span=signal_period, adjust=False).mean()
+
+
 def estimate_price_movement(symbol, interval, order_book):
-    """
-    Estimate price movement based on technical indicators and order book analysis.
-    Returns 1 for estimated increase, -1 for decrease, and 0 for no clear signal.
-    """
-    # Step 1: Fetch historical price data
+    # Fetch historical price data
     historical_data = fetch_historical_data(symbol, interval)
 
-    # Check if historical data is sufficient
-    if historical_data is None or len(historical_data) < 50:  # Ensure enough data for analysis
+    if historical_data is None or len(historical_data) < 50:
         return 0
 
     # Convert historical data to a DataFrame
     df = pd.DataFrame(historical_data)
 
-    # Define the indicators to be calculated
-    indicator_strategy = ta.Strategy(
-        name="Basic Indicators",
-        description="SMA 14, EMA 14, RSI 14, MACD",
-        ta=[
-            {"kind": "sma", "length": 14},
-            {"kind": "ema", "length": 14},
-            {"kind": "rsi", "length": 14},
-            {"kind": "macd", "fast": 12, "slow": 26, "signal": 9}
-        ]
-    )
+    # Calculate SMA, EMA, RSI, and MACD manually or using pandas_ta
+    df['SMA_14'] = df['close'].rolling(window=14).mean()
+    df['EMA_14'] = df['close'].ewm(span=14, adjust=False).mean()
+    df['RSI_14'] = ta.momentum.rsi(df['close'], length=14)
 
-    # Apply the strategy to the DataFrame
-    df.ta.strategy(indicator_strategy)
+    calculate_macd(df)
 
-    # Ensure the indicators are calculated
-    if 'SMA_14' not in df or 'EMA_14' not in df:
-        print("Required indicators not calculated.")
-        return 0
+    df['Middle_Band'] = df['close'].rolling(window=20).mean()
+    df['STD'] = df['close'].rolling(window=20).std()
+    df['Upper_Band'] = df['Middle_Band'] + (df['STD'] * 2)
+    df['Lower_Band'] = df['Middle_Band'] - (df['STD'] * 2)
 
-    # Get the latest values
-    latest_close = df['close'].iloc[-1]
-    sma = df['SMA_14'].iloc[-1]
-    ema = df['EMA_14'].iloc[-1]
-    rsi = df['RSI_14'].iloc[-1]
-    macd_current = df['MACD_12_26_9'].iloc[-1]
-    macdsignal_current = df['MACDs_12_26_9'].iloc[-1]
+    latest = df.iloc[-1]
+    rsi = latest['RSI_14']
+    macd_current = latest['MACD']
+    macdsignal_current = latest['MACD_Signal']
+    upper_band = latest['Upper_Band']
+    lower_band = latest['Lower_Band']
+    latest_close = latest['close']
 
-    # Step 3: Order book analysis for bid/ask ratio
+    # Order book analysis for bid/ask ratio
     bid_volume = sum(float(bid[1]) for bid in order_book['bids'])
     ask_volume = sum(float(ask[1]) for ask in order_book['asks'])
     bid_ask_ratio = bid_volume / ask_volume
 
-    # Step 4: Combine signals
+    # Bollinger Bands Signals
+    bb_signal = 0
+    if latest_close > upper_band:
+        bb_signal = -1  # Price might be overbought
+    elif latest_close < lower_band:
+        bb_signal = 1  # Price might be oversold
+
+    # Combine signals
     uptrend_signals = 0
     downtrend_signals = 0
-
-    # Check price against moving averages
-    if latest_close > sma and latest_close > ema:
-        uptrend_signals += 1
-    elif latest_close < sma and latest_close < ema:
-        downtrend_signals += 1
 
     # Check RSI
     if rsi > 70:
@@ -122,6 +117,12 @@ def estimate_price_movement(symbol, interval, order_book):
     elif bid_ask_ratio < 1:
         downtrend_signals += 1
 
+    # Incorporating Bollinger Band signals
+    if bb_signal == 1:
+        uptrend_signals += 1
+    elif bb_signal == -1:
+        downtrend_signals += 1
+
     # Final decision
     decision = 0
     if uptrend_signals > downtrend_signals:
@@ -129,17 +130,26 @@ def estimate_price_movement(symbol, interval, order_book):
     elif downtrend_signals > uptrend_signals:
         decision = -1
 
-    # Return a dictionary with all the data
     return {
-        'Symbol':symbol,
+        'Symbol': symbol,
         'RSI': rsi,
         'MACD_Current': macd_current,
         'MACDSignal_Current': macdsignal_current,
         'Bid_Ask_Ratio': bid_ask_ratio,
         'Uptrend_Signals': uptrend_signals,
         'Downtrend_Signals': downtrend_signals,
+        'latest_close':latest_close,
+        'Bollinger_Upper': upper_band,
+        'Bollinger_Lower': lower_band,
+        'Bollinger_Signal': bb_signal,
         'Final_Decision': decision
     }
+
+
+
+
+
+
 
 # def main():
 #     # Example usage

@@ -158,16 +158,25 @@ def calculate_top_gainers(top_n=10):
     print(f"Top gainers: {top_gainers}")
     return top_gainers
 
-def cleanup_old_data(hours_old=3):
-    """
-    Delete records from the collection that are older than the specified number of hours.
-    """
-    # Calculate the cutoff date
-    cutoff_date = datetime.utcnow() - timedelta(hours=hours_old)
+def cleanup_old_data(hours_old):
+    
+    print("Start deleting old data ........................")
 
-    # Delete documents older than the cutoff date
-    result = collection.delete_many({"timestamp": {"$lt": cutoff_date}})
-    print(f"Deleted {result.deleted_count} old records (older than {hours_old} hours).")
+    try:
+        # Calculate the cutoff date
+        cutoff_date = datetime.utcnow() - timedelta(hours=hours_old)
+
+        print("cut off date: ", cutoff_date)
+
+        # Assume 'client' is your MongoClient instance and 'db' is your database
+        collection = client.db.collection  # Replace with your collection name
+        
+        # Delete documents older than the cutoff date
+        result = collection.delete_many({"timestamp": {"$lt": cutoff_date}})
+        print(f"Deleted {result.deleted_count} old records (older than {hours_old} hours).")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 def count_records(collection):
     """
@@ -322,7 +331,10 @@ async def main():
         try:
             current_time = time.time()
             if current_time - last_cleanup_time >= cleanup_interval:
-                cleanup_old_data()
+                print('current time:', current_time)
+                print('last_cleanup_time:', last_cleanup_time)
+                print('Gap:', current_time - last_cleanup_time)
+                cleanup_old_data(3)
                 last_cleanup_time = current_time
 
             # Calculate top gainers
