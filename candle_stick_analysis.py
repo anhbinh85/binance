@@ -46,7 +46,7 @@ def fetch_historical_data(symbol, interval):
         print(f"Error fetching historical data: {e}")
         return None
 
-def calculate_macd(df, fast_period=12, slow_period=26, signal_period=9):
+def calculate_macd(df, fast_period=12, slow_period=24, signal_period=6):
     df['EMA_Fast'] = df['close'].ewm(span=fast_period, adjust=False).mean()
     df['EMA_Slow'] = df['close'].ewm(span=slow_period, adjust=False).mean()
     df['MACD'] = df['EMA_Fast'] - df['EMA_Slow']
@@ -64,10 +64,9 @@ def estimate_price_movement(symbol, interval, order_book):
     df = pd.DataFrame(historical_data)
 
     # Calculate SMA, EMA, RSI, and MACD manually or using pandas_ta
-    df['SMA_14'] = df['close'].rolling(window=14).mean()
-    df['EMA_14'] = df['close'].ewm(span=14, adjust=False).mean()
-    df['RSI_14'] = ta.momentum.rsi(df['close'], length=14)
-
+    df['SMA_12'] = df['close'].rolling(window=12).mean()
+    df['EMA_12'] = df['close'].ewm(span=12, adjust=False).mean()
+    df['RSI_12'] = ta.momentum.rsi(df['close'], length=12)
     calculate_macd(df)
 
     df['Middle_Band'] = df['close'].rolling(window=20).mean()
@@ -75,13 +74,18 @@ def estimate_price_movement(symbol, interval, order_book):
     df['Upper_Band'] = df['Middle_Band'] + (df['STD'] * 2)
     df['Lower_Band'] = df['Middle_Band'] - (df['STD'] * 2)
 
+    # Calculate Log Returns for Volatility
+    df['Log_Return'] = np.log(df['close'] / df['close'].shift(1))
+    df['Volatility'] = df['Log_Return'].rolling(window=20).std() * np.sqrt(20)  # Adjusted for 20 periods
+
     latest = df.iloc[-1]
-    rsi = latest['RSI_14']
+    rsi = latest['RSI_12']
     macd_current = latest['MACD']
     macdsignal_current = latest['MACD_Signal']
     upper_band = latest['Upper_Band']
     lower_band = latest['Lower_Band']
     latest_close = latest['close']
+    volatility = latest['Volatility']
 
     # Order book analysis for bid/ask ratio
     bid_volume = sum(float(bid[1]) for bid in order_book['bids'])
@@ -123,12 +127,19 @@ def estimate_price_movement(symbol, interval, order_book):
     elif bb_signal == -1:
         downtrend_signals += 1
 
+    # Incorporate volatility into the signals
+    volatility_threshold = df['Volatility'].quantile(0.8)  # 80th percentile as a threshold
+    if volatility > volatility_threshold:
+        downtrend_signals += 1  # Higher volatility might indicate market fear
+    else:
+        uptrend_signals += 1  # Lower volatility might indicate stability
+
     # Final decision
     decision = 0
     if uptrend_signals > downtrend_signals:
-        decision = 1
+        decision = 1  # More signals point towards an uptrend
     elif downtrend_signals > uptrend_signals:
-        decision = -1
+        decision = -1  # More signals point towards a downtrend
 
     return {
         'Symbol': symbol,
@@ -138,27 +149,11 @@ def estimate_price_movement(symbol, interval, order_book):
         'Bid_Ask_Ratio': bid_ask_ratio,
         'Uptrend_Signals': uptrend_signals,
         'Downtrend_Signals': downtrend_signals,
-        'latest_close':latest_close,
+        'latest_close': latest_close,
         'Bollinger_Upper': upper_band,
         'Bollinger_Lower': lower_band,
         'Bollinger_Signal': bb_signal,
+        'Volatility': volatility,
+        'Volatility_Threshold': volatility_threshold,
         'Final_Decision': decision
     }
-
-
-
-
-
-
-
-# def main():
-#     # Example usage
-#     historical_data = fetch_historical_data("BTCUSDT", "15m")
-#     orderbook = fetch_order_book("BTCUSDT", 500)
-#     signal = estimate_price_movement("BTCUSDT", "15m", orderbook)
-#     print(signal)
-
-# if __name__ == '__main__':
-#     main()
-
-

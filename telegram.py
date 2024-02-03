@@ -15,25 +15,23 @@ def format_message(message):
 
                 formatted_message = "Top Gainers Analysis:\n"
 
-                for data in message:
-
-                    # Determine which ratio key is present
-                    ratio_key = 'ratio ask/bid' if 'ratio ask/bid' in data['orderbook'][1] else 'ratio bid/ask'
+                for data in message:                    
 
                     formatted_message += (
                         f"\nSymbol: {data['symbol']}\n"
                         f"Price Increase (%): {data['price_increase_percentage']:.2f}\n"
-                        # f"Order Book Trend: {data['orderbook'][0]}\n"
-                        # f"Ratio ({ratio_key}): {data['orderbook'][1][ratio_key]:.2f}\n"
+                        f"Order Book Trend: {data['orderbook'][0]}\n"
                         f"RSI: {data['price_movement']['RSI']:.2f}\n"
-                        f"MACD: {data['price_movement']['MACD_Current']:.6f}\n"
-                        f"MACD Signal: {data['price_movement']['MACDSignal_Current']:.6f}\n"
+                        # f"MACD: {data['price_movement']['MACD_Current']:.6f}\n"
+                        # f"MACD Signal: {data['price_movement']['MACDSignal_Current']:.6f}\n"
                         f"Bid/Ask Ratio: {data['price_movement']['Bid_Ask_Ratio']:.2f}\n"
                         f"Uptrend Signals: {data['price_movement']['Uptrend_Signals']}\n"
                         f"Downtrend Signals: {data['price_movement']['Downtrend_Signals']}\n"
                         f"latest_close: {data['price_movement']['latest_close']}\n"
-                        f"Bollinger_Upper: {data['price_movement']['Bollinger_Upper']}\n"
-                        f"Bollinger_Lower: {data['price_movement']['Bollinger_Lower']}\n"
+                        # f"Bollinger_Upper: {data['price_movement']['Bollinger_Upper']}\n"
+                        # f"Bollinger_Lower: {data['price_movement']['Bollinger_Lower']}\n"
+                        f"Volatility: {data['price_movement']['Volatility']}\n"
+                        f"Volatility_Threshold: {data['price_movement']['Volatility_Threshold']}\n"
                         f"Bollinger Signals:{data['price_movement']['Bollinger_Signal']}, {'Oversold' if data['price_movement']['Bollinger_Signal'] == 1 else 'Overbought' if data['price_movement']['Bollinger_Signal'] == -1 else 'Neutral'}\n"
                         f"Final Decision: {'Increase' if data['price_movement']['Final_Decision'] == 1 else 'Decrease' if data['price_movement']['Final_Decision'] == -1 else 'Neutral'}\n"
                         f"Trading Signals: {data['trading_signal']}\n"
