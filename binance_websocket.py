@@ -290,7 +290,7 @@ async def analyze_all_gainers_order_book(top_gainers):
 
         price_movement = estimate_price_movement(symbol, interval, order_book)
 
-        trading_signal = trading_decision_based_on_conditions(price_movement)
+        trading_signal = trading_decision_based_on_conditions(price_movement, order_book_trend[0])
 
         # Generate the result dictionary for each symbol
         result = {
@@ -305,7 +305,7 @@ async def analyze_all_gainers_order_book(top_gainers):
     for res in results:
         print(res)
 
-    return results
+    return results, trading_signal
 
 
 
@@ -345,7 +345,7 @@ async def main():
 
             # Analyze the top gainer and its order book
             
-            top_gainer_analysis = await analyze_all_gainers_order_book(top_gainers)
+            top_gainer_analysis, trading_signal = await analyze_all_gainers_order_book(top_gainers)
         
             # Format and send the analysis to Telegram
             

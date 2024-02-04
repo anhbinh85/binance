@@ -1,15 +1,15 @@
-File created on: 2024-02-03 23:52:26
+File created on: 2024-02-04 12:09:55
 Total unique symbols: 390
 
-Symbol: OMUSDT, Start Price: 0.14435, Start Time: 2024-02-03 16:38:11.500000, End Price: 0.15134, End Time: 2024-02-03 16:51:28.417000, Price Change (%): 4.842396951853132
-Symbol: CITYUSDT, Start Price: 3.096, Start Time: 2024-02-03 16:38:10.534000, End Price: 3.19, End Time: 2024-02-03 16:52:22.966000, Price Change (%): 3.036175710594311
-Symbol: CKBUSDT, Start Price: 0.004262, Start Time: 2024-02-03 16:38:11.096000, End Price: 0.004368, End Time: 2024-02-03 16:51:28.531000, Price Change (%): 2.487095260441112
-Symbol: BTTCUSDT, Start Price: 8e-07, Start Time: 2024-02-03 16:38:10.624000, End Price: 8.1e-07, End Time: 2024-02-03 16:50:30.236000, Price Change (%): 1.2500000000000013
-Symbol: IMXUSDT, Start Price: 2.1921, Start Time: 2024-02-03 16:38:11.552000, End Price: 2.2091, End Time: 2024-02-03 16:51:27.931000, Price Change (%): 0.7755120660553764
-Symbol: MAGICUSDT, Start Price: 1.33, Start Time: 2024-02-03 16:38:11.401000, End Price: 1.3399, End Time: 2024-02-03 16:51:28.211000, Price Change (%): 0.7443609022556406
-Symbol: SYSUSDT, Start Price: 0.1214, Start Time: 2024-02-03 16:47:40.547000, End Price: 0.1221, End Time: 2024-02-03 16:51:26.747000, Price Change (%): 0.5766062602965455
-Symbol: CRVUSDT, Start Price: 0.4714, Start Time: 2024-02-03 16:38:11.092000, End Price: 0.4741, End Time: 2024-02-03 16:51:28.388000, Price Change (%): 0.5727619855748909
-Symbol: FISUSDT, Start Price: 0.4226, Start Time: 2024-02-03 16:45:45.355000, End Price: 0.4249, End Time: 2024-02-03 16:51:27.566000, Price Change (%): 0.544249881684814
-Symbol: CHZUSDT, Start Price: 0.10322, Start Time: 2024-02-03 16:38:11.056000, End Price: 0.10374, End Time: 2024-02-03 16:50:29.957000, Price Change (%): 0.503778337531479
-latest top gainers in database: {'_id': ObjectId('65be6f49d88bf2ade8fae441'), 'startPrice': 0.14435, 'endPrice': 0.15134, 'startTime': '2024-02-03 16:38:11.500000', 'endTime': '2024-02-03 16:51:28.417000', 'symbol': 'OMUSDT', 'priceChangePercent': 4.842396951853132, 'recordedAt': datetime.datetime(2024, 2, 3, 16, 52, 25, 986000)}
+Symbol: DATAUSDT, Start Price: 0.05197, Start Time: 2024-02-04 04:54:55.614000, End Price: 0.05287, End Time: 2024-02-04 05:09:53.898000, Price Change (%): 1.7317683278814662
+Symbol: CKBUSDT, Start Price: 0.004421, Start Time: 2024-02-04 04:54:56.504000, End Price: 0.004474, End Time: 2024-02-04 05:09:52.696000, Price Change (%): 1.1988237955213774
+Symbol: GALUSDT, Start Price: 1.83, Start Time: 2024-02-04 05:02:13.944000, End Price: 1.843, End Time: 2024-02-04 05:09:52.877000, Price Change (%): 0.7103825136611968
+Symbol: RNDRUSDT, Start Price: 4.725, Start Time: 2024-02-04 04:54:55.845000, End Price: 4.751, End Time: 2024-02-04 05:09:53.651000, Price Change (%): 0.5502645502645649
+Symbol: BANDUSDT, Start Price: 1.806, Start Time: 2024-02-04 05:02:13.511000, End Price: 1.814, End Time: 2024-02-04 05:04:11.624000, Price Change (%): 0.44296788482835037
+Symbol: TROYUSDT, Start Price: 0.002307, Start Time: 2024-02-04 05:02:17.177000, End Price: 0.002317, End Time: 2024-02-04 05:03:15.334000, Price Change (%): 0.43346337234503796
+Symbol: PYTHUSDT, Start Price: 0.482, Start Time: 2024-02-04 05:00:11.753000, End Price: 0.4838, End Time: 2024-02-04 05:04:10.509000, Price Change (%): 0.3734439834024946
+Symbol: WRXUSDT, Start Price: 0.1921, Start Time: 2024-02-04 05:02:13.170000, End Price: 0.1926, End Time: 2024-02-04 05:03:13.546000, Price Change (%): 0.2602811035918795
+Symbol: ICPUSDT, Start Price: 12.629, Start Time: 2024-02-04 05:02:13.646000, End Price: 12.656, End Time: 2024-02-04 05:04:11.946000, Price Change (%): 0.2137936495367885
+Symbol: BEAMXUSDT, Start Price: 0.016905, Start Time: 2024-02-04 05:02:13.516000, End Price: 0.016935, End Time: 2024-02-04 05:04:11.647000, Price Change (%): 0.17746228926352425
+latest top gainers in database: {'_id': ObjectId('65bf1c22084c166c5b781c1e'), 'startPrice': 0.05197, 'endPrice': 0.05287, 'startTime': '2024-02-04 04:54:55.614000', 'endTime': '2024-02-04 05:09:53.898000', 'symbol': 'DATAUSDT', 'priceChangePercent': 1.7317683278814662, 'recordedAt': datetime.datetime(2024, 2, 4, 5, 9, 54, 750000)}
 
