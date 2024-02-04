@@ -62,7 +62,8 @@ def fetch_futures_symbols():
         print(f"Failed to fetch futures symbols: {e}")
         return []
 
-def is_symbol_supported_for_futures(symbol, futures_symbols):
+def is_symbol_supported_for_futures(symbol):
+    futures_symbols = fetch_futures_symbols()
     return symbol in futures_symbols
 
 def check_futures_account_balance():
@@ -97,44 +98,49 @@ def calculate_quantity_for_usd_amount(usd_amount, market_price):
 def execute_order_based_on_signal_and_balance(trading_signal, client):
     
     symbol = trading_signal['Symbol']
+    # print("Symbol in execute order: ", symbol)
 
     # Fetch futures symbols list
     futures_symbols = fetch_futures_symbols()
-    print("Futures_symbols: ", futures_symbols)
- 
-    # Check if the symbol is supported for futures trading
-    if not is_symbol_supported_for_futures(symbol, futures_symbols):
-        return {'error': f'{symbol} is not supported for futures trading.'}
-    
-    # Attempt to set leverage, but do not stop the process if it fails
-    leverage_response = set_leverage(symbol)
-    if not leverage_response['success']:
-        # Log the failure but do not return an error to allow the order process to continue
-        print(f"Proceeding without setting leverage for {symbol}. Reason: {leverage_response.get('error', 'Unknown error')}")
-    
-    # Continue with order execution
-    balances = check_futures_account_balance()
-    trade_decision = can_trade_based_on_balance(trading_signal, balances)
-    if not trade_decision['can_trade']:
-        return {'error': 'Insufficient balance for trading.'}
-    
-    market_price = get_market_price(symbol)
-    usd_amount = 5  # Define the USD amount to trade
-    initial_quantity = calculate_quantity_for_usd_amount(usd_amount, market_price)
-    # Ensure to adjust the quantity precision based on the symbol's requirements
-    adjusted_quantity = adjust_quantity_precision(symbol, initial_quantity, client)
-    
-    try:
-        # Place the order based on the trading signal, without relying on leverage being set
-        if trading_signal['Long Position'] == 1:
-            order_response = client.futures_create_order(symbol=symbol, side='BUY', type='MARKET', quantity=adjusted_quantity)
-        elif trading_signal['Short Position'] == 1:
-            order_response = client.futures_create_order(symbol=symbol, side='SELL', type='MARKET', quantity=adjusted_quantity)
-        else:
-            return {'error': 'Invalid trading signal provided.'}
-        return order_response
-    except Exception as e:
-        return {'error': str(e)}
+    # print("Futures_symbols: ", futures_symbols)
+
+    if symbol in futures_symbols:
+
+        try:
+            # Attempt to set leverage, but do not stop the process if it fails
+
+            leverage_response = set_leverage(symbol)
+
+            if not leverage_response['success']:
+                # Log the failure but do not return an error to allow the order process to continue
+                print(f"Proceeding without setting leverage for {symbol}. Reason: {leverage_response.get('error', 'Unknown error')}")
+        
+            # Continue with order execution
+            balances = check_futures_account_balance()
+            trade_decision = can_trade_based_on_balance(trading_signal, balances)
+            if not trade_decision['can_trade']:
+                return {'error': 'Insufficient balance for trading.'}
+            
+            market_price = get_market_price(symbol)
+            usd_amount = 5  # Define the USD amount to trade
+            initial_quantity = calculate_quantity_for_usd_amount(usd_amount, market_price)
+            # Ensure to adjust the quantity precision based on the symbol's requirements
+            adjusted_quantity = adjust_quantity_precision(symbol, initial_quantity, client)
+            print("adjust_quantity_precision: ", adjusted_quantity)
+            # Place the order based on the trading signal, without relying on leverage being set
+            if trading_signal['Long Position'] == 1:
+                order_response = client.futures_create_order(symbol=symbol, side='BUY', type='MARKET', quantity=adjusted_quantity)
+            elif trading_signal['Short Position'] == 1:
+                order_response = client.futures_create_order(symbol=symbol, side='SELL', type='MARKET', quantity=adjusted_quantity)
+            else:
+                return {'error': 'Invalid trading signal provided.'}
+            return order_response
+
+        except Exception as e:
+            return {'error': str(e)}
+
+    else:
+        return {f'{symbol} is not supported for futures trading.'}
 
 
 
@@ -212,3 +218,5 @@ def close_positions_based_on_profit_loss(client, profit_threshold=0.03, loss_thr
 # print(futures_symbols)
 
 # print(is_symbol_supported_for_futures("TROYUSDT", futures_symbols))
+
+# print(adjust_quantity_precision('JUPUSDT', 1000, client))

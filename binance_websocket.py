@@ -13,7 +13,7 @@ from telegram import send_telegram_message, format_message
 from trading_logic import trading_decision_based_on_conditions
 from orderbook_analysis import fetch_order_book, analyze_order_book
 from candle_stick_analysis import fetch_historical_data, estimate_price_movement
-from trading_execution import client, execute_order_based_on_signal_and_balance, close_positions_based_on_profit_loss
+from trading_execution import client as client_binance, execute_order_based_on_signal_and_balance, close_positions_based_on_profit_loss
 
 
 
@@ -361,11 +361,12 @@ async def main():
             # Execute trading decisions based on the analysis and trading signal
             # Make sure to check your account balance and trading conditions before executing
             for signal in top_gainer_analysis:
-                trade_response = execute_order_based_on_signal_and_balance(signal['trading_signal'], client)
+                # print("signal: ", signal['trading_signal'])
+                trade_response = execute_order_based_on_signal_and_balance(signal['trading_signal'], client_binance)
                 print(f"Trade execution response: {trade_response}")
 
             # This function checks all your open positions and decides whether to close them
-            close_positions_response = close_positions_based_on_profit_loss(client, profit_threshold=0.03, loss_threshold=-0.03)
+            close_positions_response = close_positions_based_on_profit_loss(client_binance, profit_threshold=0.03, loss_threshold=-0.03)
             print(f"Close positions response: {close_positions_response}")
 
             if top_gainer_symbols:
