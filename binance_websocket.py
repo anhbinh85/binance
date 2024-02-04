@@ -13,6 +13,7 @@ from telegram import send_telegram_message, format_message
 from trading_logic import trading_decision_based_on_conditions
 from orderbook_analysis import fetch_order_book, analyze_order_book
 from candle_stick_analysis import fetch_historical_data, estimate_price_movement
+from trading_execution import client, execute_order_based_on_signal_and_balance, close_positions_based_on_profit_loss
 
 
 
@@ -305,7 +306,7 @@ async def analyze_all_gainers_order_book(top_gainers):
     for res in results:
         print(res)
 
-    return results, trading_signal
+    return results
 
 
 
@@ -345,7 +346,7 @@ async def main():
 
             # Analyze the top gainer and its order book
             
-            top_gainer_analysis, trading_signal = await analyze_all_gainers_order_book(top_gainers)
+            top_gainer_analysis = await analyze_all_gainers_order_book(top_gainers)
         
             # Format and send the analysis to Telegram
             
@@ -356,6 +357,16 @@ async def main():
             except Exception as e:
                 print(f"Error occurred in sending telegram: {e}")
 
+            # Here is where you'd integrate the trading execution logic
+            # Execute trading decisions based on the analysis and trading signal
+            # Make sure to check your account balance and trading conditions before executing
+            for signal in top_gainer_analysis:
+                trade_response = execute_order_based_on_signal_and_balance(signal['trading_signal'], client)
+                print(f"Trade execution response: {trade_response}")
+
+            # This function checks all your open positions and decides whether to close them
+            close_positions_response = close_positions_based_on_profit_loss(client, profit_threshold=0.03, loss_threshold=-0.03)
+            print(f"Close positions response: {close_positions_response}")
 
             if top_gainer_symbols:
                 # Cancel the existing WebSocket task and start a new one with updated symbols
