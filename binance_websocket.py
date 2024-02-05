@@ -79,7 +79,7 @@ async def handle_message(message, collection):
         # print(f"Inserted new record for {symbol} at {timestamp}")
 
     except Exception as e:
-        print(f"Error processing message: {e}")
+        print(f"Error processing message at handle_message: {e}")
 
 
 async def binance_ws(symbols, collection):
@@ -103,7 +103,7 @@ async def binance_ws(symbols, collection):
             print(f"WebSocket connection closed: {e}")
 
         except Exception as e:
-            print(f"Error processing message: {e}")
+            print(f"Error processing message at binance_ws: {e}")
 
         print("Attempting to reconnect in 5 seconds...")
         
@@ -177,7 +177,7 @@ def cleanup_old_data(hours_old):
         print(f"Deleted {result.deleted_count} old records (older than {hours_old} hours).")
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred at cleanup_old_data: {e}")
 
 def count_records(collection):
     """
@@ -314,6 +314,7 @@ async def main():
     print("Starting main function...")
     # Fetch all symbols from Binance
     all_symbols = fetch_all_binance_symbols()
+    print("all symbols: ", all_symbols)
 
     # Start the WebSocket connection with all symbols
     ws_task = asyncio.create_task(binance_ws(all_symbols, collection))
@@ -343,10 +344,12 @@ async def main():
             record_top_gainers(top_gainers)
             write_top_gainers_to_file(top_gainers)
             top_gainer_symbols = [item['symbol'] for item in top_gainers]
+            print("top_gainer_symbols: ", top_gainer_symbols)
 
             # Analyze the top gainer and its order book
             
             top_gainer_analysis = await analyze_all_gainers_order_book(top_gainers)
+            print("top_gainer_analysis: ", top_gainer_analysis)
         
             # Format and send the analysis to Telegram
             
@@ -366,7 +369,8 @@ async def main():
                 print(f"Trade execution response: {trade_response}")
 
             # This function checks all your open positions and decides whether to close them
-            close_positions_response = close_positions_based_on_profit_loss(client_binance, profit_threshold=0.03, loss_threshold=-0.03)
+            print("Start to check and close position...")
+            close_positions_response = close_positions_based_on_profit_loss(client_binance, profit_threshold=0.03)
             print(f"Close positions response: {close_positions_response}")
 
             if top_gainer_symbols:
@@ -381,7 +385,7 @@ async def main():
                 ws_task = asyncio.create_task(binance_ws(top_gainer_symbols, collection))
 
         except Exception as e:
-            print(f"Error occurred: {e}")
+            print(f"Error occurred at main: {e}")
 
         # Wait for the next interval
         await asyncio.sleep(300)  # 5 minutes

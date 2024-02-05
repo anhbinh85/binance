@@ -599,3 +599,62 @@ def estimate_price_movement(symbol, interval, order_book):
         'Bollinger_Signal': bb_signal,
         'Final_Decision': decision
     }
+
+
+def close_positions_based_on_profit_loss(client, profit_threshold=0.03, loss_threshold=-0.03):
+
+    closed_positions = []
+    no_action_positions = []
+
+    try:
+        # Get current open positions
+        positions = client.futures_account()['positions']
+        for position in positions:
+            if float(position['positionAmt']) != 0:  # There's an open position
+                symbol = position['symbol']
+                positionAmt = float(position['positionAmt'])
+                unRealizedProfit = float(position['unRealizedProfit'])
+                entryPrice = float(position['entryPrice'])
+                markPrice = float(position['markPrice'])
+                notional = abs(positionAmt * markPrice)
+                pnl_percentage = unRealizedProfit / notional
+
+                if pnl_percentage >= profit_threshold or pnl_percentage <= loss_threshold:
+                    # To close the position, determine the opposite side
+                    side = 'SELL' if positionAmt > 0 else 'BUY'
+                    # Calculate the absolute quantity to close the position
+                    quantity = abs(positionAmt)
+
+                    # Close the position by placing a market order
+                    order_response = client.futures_create_order(
+                        symbol=symbol, 
+                        side=side, 
+                        type='MARKET', 
+                        quantity=quantity
+                    )
+                    closed_positions.append({
+                        'symbol': symbol,
+                        'positionAmt': positionAmt,
+                        'entryPrice': entryPrice,
+                        'closingPrice': markPrice,
+                        'pnl_percentage': pnl_percentage,
+                        'order_response': order_response
+                    })
+                else:
+                    no_action_positions.append({
+                        'symbol': symbol,
+                        'positionAmt': positionAmt,
+                        'entryPrice': entryPrice,
+                        'currentPrice': markPrice,
+                        'pnl_percentage': pnl_percentage,
+                        'action': 'No action taken'
+                    })
+
+    except BinanceAPIException as e:
+        print(f"Error closing positions: {e}")
+        return {'error': str(e)}
+
+    return {
+        'closed_positions': closed_positions,
+        'no_action_positions': no_action_positions
+    }

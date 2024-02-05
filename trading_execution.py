@@ -94,6 +94,14 @@ def calculate_quantity_for_usd_amount(usd_amount, market_price):
     quantity = usd_amount / market_price
     return round(quantity, 6)
 
+def has_open_positions(symbol, client):
+    """Check if there are open positions for a given symbol."""
+    positions = client.futures_account()["positions"]
+    for position in positions:
+        if position['symbol'] == symbol and float(position['positionAmt']) != 0:
+            return True
+    return False
+
 
 def execute_order_based_on_signal_and_balance(trading_signal, client):
     
@@ -103,6 +111,10 @@ def execute_order_based_on_signal_and_balance(trading_signal, client):
     # Fetch futures symbols list
     futures_symbols = fetch_futures_symbols()
     # print("Futures_symbols: ", futures_symbols)
+
+     # Check for existing positions
+    if has_open_positions(symbol, client):
+        return {'error': f'Existing open position for {symbol}, cannot place new order.'}
 
     if symbol in futures_symbols:
 
@@ -144,67 +156,61 @@ def execute_order_based_on_signal_and_balance(trading_signal, client):
 
 
 
-def close_positions_based_on_profit_loss(client, profit_threshold=0.03, loss_threshold=-0.03):
-    """
-    Closes open futures positions based on profit or loss thresholds. Also, reports positions that did not meet the threshold.
-
-    Parameters:
-    - client: Initialized Binance futures client.
-    - profit_threshold: The profit percentage at which to close the position (e.g., 0.03 for 3%).
-    - loss_threshold: The loss percentage at which to close the position (e.g., -0.03 for -3%).
-
-    Returns:
-    - A dictionary with lists of closed positions and positions not meeting the threshold.
-    """
+def close_positions_based_on_profit_loss(client, profit_threshold=0.03):
     closed_positions = []
     no_action_positions = []
 
-    # Get current open positions
-    positions = client.futures_account()['positions']
-    for position in positions:
-        if float(position['positionAmt']) == 0:
-            continue  # Skip if no open position
-        
-        symbol = position['symbol']
-        entryPrice = float(position['entryPrice'])
-        markPrice = float(position['markPrice'])
-        positionAmt = float(position['positionAmt'])
-        unRealizedProfit = float(position['unRealizedProfit'])
-        pnl_percentage = unRealizedProfit / (entryPrice * abs(positionAmt))
+    try:
+        # Get current open positions
+        account_info = client.futures_account()
+        positions = account_info.get('positions', [])
+        for position in positions:
+            print("position in close position function: ", position)
+            positionAmt = float(position.get('positionAmt', 0))
+            if positionAmt != 0:
+                symbol = position.get('symbol')
+                entryPrice = float(position.get('entryPrice', '0'))
+                markPrice = float(position.get('markPrice', '0'))
+                unRealizedProfit = float(position.get('unrealizedProfit', '0'))
+                notional = abs(positionAmt * markPrice)  # Using markPrice for notional calculation
 
-        # Check if the PnL meets the threshold to close the position
-        if pnl_percentage >= profit_threshold or pnl_percentage <= loss_threshold:
-            # Determine side based on whether the position is long or short
-            side = 'SELL' if positionAmt > 0 else 'BUY'
-            quantity = abs(positionAmt)
-            
-            # Close the position
-            order_response = client.futures_create_order(symbol=symbol, side=side, type='MARKET', quantity=quantity)
-            
-            # Add details to the closed positions list
-            closed_positions.append({
-                'symbol': symbol,
-                'entryPrice': entryPrice,
-                'closingPrice': markPrice,
-                'quantity': positionAmt,
-                'pnl_percentage': pnl_percentage,
-                'order_response': order_response
-            })
-        else:
-            # Position does not meet the threshold, add to no_action_positions list
-            no_action_positions.append({
-                'symbol': symbol,
-                'entryPrice': entryPrice,
-                'currentPrice': markPrice,
-                'quantity': positionAmt,
-                'pnl_percentage': pnl_percentage,
-                'action': 'No action taken'
-            })
+                # Calculate PnL percentage based on notional and unrealizedProfit
+                pnl_percentage = (unRealizedProfit / notional) if notional else 0
+
+                if pnl_percentage >= profit_threshold:
+                    # Determine the correct side for closing the position
+                    side = 'SELL' if positionAmt > 0 else 'BUY'
+                    quantity = abs(positionAmt)
+                    # Execute market order to close the position
+                    order_response = client.futures_create_order(symbol=symbol, side=side, type='MARKET', quantity=quantity)
+                    closed_positions.append({
+                        'symbol': symbol,
+                        'positionAmt': positionAmt,
+                        'entryPrice': entryPrice,
+                        'closingPrice': markPrice,
+                        'pnl_percentage': pnl_percentage,
+                        'order_response': order_response
+                    })
+                else:
+                    # Append to no action positions if PnL threshold is not met
+                    no_action_positions.append({
+                        'symbol': symbol,
+                        'positionAmt': positionAmt,
+                        'entryPrice': entryPrice,
+                        'currentPrice': markPrice,
+                        'pnl_percentage': pnl_percentage,
+                        'action': 'No action taken'
+                    })
+
+    except BinanceAPIException as e:
+        print(f"Error closing positions: {e}")
+        return {'error': str(e)}
 
     return {
         'closed_positions': closed_positions,
         'no_action_positions': no_action_positions
     }
+
 
 
 
