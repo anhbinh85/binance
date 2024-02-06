@@ -370,7 +370,7 @@ async def main():
 
             # This function checks all your open positions and decides whether to close them
             print("Start to check and close position...")
-            close_positions_response = close_positions_based_on_profit_loss(client_binance, profit_threshold=0.03)
+            close_positions_response = close_positions_based_on_profit_loss(client_binance, profit_threshold=0.01)
             print(f"Close positions response: {close_positions_response}")
 
             if top_gainer_symbols:

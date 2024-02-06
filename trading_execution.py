@@ -134,7 +134,7 @@ def execute_order_based_on_signal_and_balance(trading_signal, client):
                 return {'error': 'Insufficient balance for trading.'}
             
             market_price = get_market_price(symbol)
-            usd_amount = 5  # Define the USD amount to trade
+            usd_amount = 6  # Define the USD amount to trade
             initial_quantity = calculate_quantity_for_usd_amount(usd_amount, market_price)
             # Ensure to adjust the quantity precision based on the symbol's requirements
             adjusted_quantity = adjust_quantity_precision(symbol, initial_quantity, client)
@@ -155,8 +155,8 @@ def execute_order_based_on_signal_and_balance(trading_signal, client):
         return {f'{symbol} is not supported for futures trading.'}
 
 
+def close_positions_based_on_profit_loss(client, profit_threshold=0.01):
 
-def close_positions_based_on_profit_loss(client, profit_threshold=0.03):
     closed_positions = []
     no_action_positions = []
 
@@ -165,24 +165,32 @@ def close_positions_based_on_profit_loss(client, profit_threshold=0.03):
         account_info = client.futures_account()
         positions = account_info.get('positions', [])
         for position in positions:
-            print("position in close position function: ", position)
             positionAmt = float(position.get('positionAmt', 0))
+
             if positionAmt != 0:
                 symbol = position.get('symbol')
                 entryPrice = float(position.get('entryPrice', '0'))
-                markPrice = float(position.get('markPrice', '0'))
+                # Fetch current markPrice for a more accurate calculation
+                current_price_info = client.futures_symbol_ticker(symbol=symbol)
+                markPrice = float(current_price_info['price']) if current_price_info else 0
                 unRealizedProfit = float(position.get('unrealizedProfit', '0'))
-                notional = abs(positionAmt * markPrice)  # Using markPrice for notional calculation
 
-                # Calculate PnL percentage based on notional and unrealizedProfit
+                # Calculate notional using markPrice
+                notional = abs(positionAmt * markPrice)
+
+                # Calculate PnL percentage
                 pnl_percentage = (unRealizedProfit / notional) if notional else 0
 
+                print(f"Checking position for {symbol}: PnL%={pnl_percentage*100:.2f}% vs. Threshold={profit_threshold*100}%")
+
                 if pnl_percentage >= profit_threshold:
-                    # Determine the correct side for closing the position
                     side = 'SELL' if positionAmt > 0 else 'BUY'
                     quantity = abs(positionAmt)
-                    # Execute market order to close the position
+                    print(f"Attempting to close {symbol} | Side: {side} | Quantity: {quantity}")
                     order_response = client.futures_create_order(symbol=symbol, side=side, type='MARKET', quantity=quantity)
+
+                    print(f"Order response for {symbol}: {order_response}")
+
                     closed_positions.append({
                         'symbol': symbol,
                         'positionAmt': positionAmt,
@@ -192,7 +200,7 @@ def close_positions_based_on_profit_loss(client, profit_threshold=0.03):
                         'order_response': order_response
                     })
                 else:
-                    # Append to no action positions if PnL threshold is not met
+                    print(f"No action taken for {symbol}: PnL%={pnl_percentage*100:.2f}%")
                     no_action_positions.append({
                         'symbol': symbol,
                         'positionAmt': positionAmt,
@@ -201,15 +209,17 @@ def close_positions_based_on_profit_loss(client, profit_threshold=0.03):
                         'pnl_percentage': pnl_percentage,
                         'action': 'No action taken'
                     })
-
     except BinanceAPIException as e:
-        print(f"Error closing positions: {e}")
+        print(f"Error closing positions for {symbol}: {e}")
         return {'error': str(e)}
 
     return {
         'closed_positions': closed_positions,
         'no_action_positions': no_action_positions
     }
+
+
+
 
 
 
