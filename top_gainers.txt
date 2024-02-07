@@ -1,15 +1,15 @@
-File created on: 2024-02-06 19:00:06
-Total unique symbols: 392
+File created on: 2024-02-07 18:24:33
+Total unique symbols: 393
 
-Symbol: LOKAUSDT, Start Price: 0.2164, Start Time: 2024-02-06 11:45:12.971000, End Price: 0.2173, End Time: 2024-02-06 12:00:02.780000, Price Change (%): 0.41589648798520523
-Symbol: ASTRUSDT, Start Price: 0.1806, Start Time: 2024-02-06 11:45:05.934000, End Price: 0.1807, End Time: 2024-02-06 12:00:04.769000, Price Change (%): 0.055370985603537634
-Symbol: PNTUSDT, Start Price: 0.1375, Start Time: 2024-02-06 11:45:16.521000, End Price: 0.1375, End Time: 2024-02-06 12:00:02.929000, Price Change (%): 0.0
-Symbol: OGUSDT, Start Price: 4.662, Start Time: 2024-02-06 11:45:33.775000, End Price: 4.662, End Time: 2024-02-06 11:59:49.274000, Price Change (%): 0.0
-Symbol: PERPUSDT, Start Price: 1.04705, Start Time: 2024-02-06 11:45:06.163000, End Price: 1.0464, End Time: 2024-02-06 12:00:04.665000, Price Change (%): -0.06207917482451071
-Symbol: UMAUSDT, Start Price: 4.088, Start Time: 2024-02-06 11:45:05.866000, End Price: 4.084, End Time: 2024-02-06 12:00:05.196000, Price Change (%): -0.09784735812134167
-Symbol: LDOUSDT, Start Price: 2.732, Start Time: 2024-02-06 11:45:05.862000, End Price: 2.724, End Time: 2024-02-06 12:00:04.431000, Price Change (%): -0.292825768667643
-Symbol: JASMYUSDT, Start Price: 0.00551, Start Time: 2024-02-06 11:45:05.910000, End Price: 0.005479, End Time: 2024-02-06 12:00:04.424000, Price Change (%): -0.5626134301270377
-Symbol: WNXMUSDT, Start Price: 48.41, Start Time: 2024-02-06 11:45:30.984000, End Price: 48.02, End Time: 2024-02-06 12:00:02.769000, Price Change (%): -0.8056186738277081
-Symbol: COTIUSDT, Start Price: 0.0633, Start Time: 2024-02-06 11:45:05.552000, End Price: 0.06267, End Time: 2024-02-06 12:00:04.908000, Price Change (%): -0.9952606635070959
-latest top gainers in database: {'_id': ObjectId('65c21f463726a6d72cf981b1'), 'startPrice': 0.2164, 'endPrice': 0.2173, 'startTime': '2024-02-06 11:45:12.971000', 'endTime': '2024-02-06 12:00:02.780000', 'symbol': 'LOKAUSDT', 'priceChangePercent': 0.41589648798520523, 'recordedAt': datetime.datetime(2024, 2, 6, 12, 0, 6, 206000)}
+Symbol: DUSKUSDT, Start Price: 0.311, Start Time: 2024-02-07 11:09:33.950000, End Price: 0.3123, End Time: 2024-02-07 11:24:31.702000, Price Change (%): 0.41800643086817474
+Symbol: RONINUSDT, Start Price: 2.532, Start Time: 2024-02-07 11:09:37.984000, End Price: 2.542, End Time: 2024-02-07 11:24:29.800000, Price Change (%): 0.39494470774090784
+Symbol: FIROUSDT, Start Price: 1.536, Start Time: 2024-02-07 11:11:00.817000, End Price: 1.539, End Time: 2024-02-07 11:24:02.278000, Price Change (%): 0.19531249999999292
+Symbol: KAVAUSDT, Start Price: 0.685, Start Time: 2024-02-07 11:09:39.051000, End Price: 0.686, End Time: 2024-02-07 11:24:32.303000, Price Change (%): 0.14598540145985414
+Symbol: YGGUSDT, Start Price: 0.4218, Start Time: 2024-02-07 11:09:51.251000, End Price: 0.4224, End Time: 2024-02-07 11:24:32.302000, Price Change (%): 0.14224751066856078
+Symbol: ALTUSDT, Start Price: 0.30716, Start Time: 2024-02-07 11:09:32.953000, End Price: 0.30743, End Time: 2024-02-07 11:24:31.771000, Price Change (%): 0.08790207058210459
+Symbol: WANUSDT, Start Price: 0.208, Start Time: 2024-02-07 11:10:31.280000, End Price: 0.2079, End Time: 2024-02-07 11:24:24.385000, Price Change (%): -0.048076923076917785
+Symbol: QKCUSDT, Start Price: 0.00957, Start Time: 2024-02-07 11:09:33.869000, End Price: 0.009545, End Time: 2024-02-07 11:24:32.530000, Price Change (%): -0.261233019853717
+Symbol: XMRUSDT, Start Price: 128.1, Start Time: 2024-02-07 11:09:34.374000, End Price: 127.3, End Time: 2024-02-07 11:24:32.564000, Price Change (%): -0.6245120999219338
+Symbol: CHRUSDT, Start Price: 0.3124, Start Time: 2024-02-07 11:09:33.149000, End Price: 0.3056, End Time: 2024-02-07 11:24:31.498000, Price Change (%): -2.176696542893735
+latest top gainers in database: {'_id': ObjectId('65c368712a3b6ad21d1716c7'), 'startPrice': 0.311, 'endPrice': 0.3123, 'startTime': '2024-02-07 11:09:33.950000', 'endTime': '2024-02-07 11:24:31.702000', 'symbol': 'DUSKUSDT', 'priceChangePercent': 0.41800643086817474, 'recordedAt': datetime.datetime(2024, 2, 7, 11, 24, 33, 565000)}
 

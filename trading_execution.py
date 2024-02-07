@@ -156,34 +156,40 @@ def execute_order_based_on_signal_and_balance(trading_signal, client):
 
 
 def close_positions_based_on_profit_loss(client, profit_threshold=0.01):
-
     closed_positions = []
     no_action_positions = []
+
+    total_unrealized_profit = 0.0
+    total_notional = 0.0
 
     try:
         # Get current open positions
         account_info = client.futures_account()
         positions = account_info.get('positions', [])
+        
+        # First, calculate total unrealized profit and total notional
         for position in positions:
+
             positionAmt = float(position.get('positionAmt', 0))
 
             if positionAmt != 0:
+                print("Position in close function:", position)
+                unRealizedProfit = float(position.get('unrealizedProfit', '0'))
                 symbol = position.get('symbol')
                 entryPrice = float(position.get('entryPrice', '0'))
-                # Fetch current markPrice for a more accurate calculation
                 current_price_info = client.futures_symbol_ticker(symbol=symbol)
                 markPrice = float(current_price_info['price']) if current_price_info else 0
-                unRealizedProfit = float(position.get('unrealizedProfit', '0'))
-
-                # Calculate notional using markPrice
                 notional = abs(positionAmt * markPrice)
+                total_unrealized_profit += unRealizedProfit
+                total_notional += notional
 
                 # Calculate PnL percentage
                 pnl_percentage = (unRealizedProfit / notional) if notional else 0
 
-                print(f"Checking position for {symbol}: PnL%={pnl_percentage*100:.2f}% vs. Threshold={profit_threshold*100}%")
+
 
                 if pnl_percentage >= profit_threshold:
+
                     side = 'SELL' if positionAmt > 0 else 'BUY'
                     quantity = abs(positionAmt)
                     print(f"Attempting to close {symbol} | Side: {side} | Quantity: {quantity}")
@@ -209,14 +215,124 @@ def close_positions_based_on_profit_loss(client, profit_threshold=0.01):
                         'pnl_percentage': pnl_percentage,
                         'action': 'No action taken'
                     })
+
+        
+
+        # Calculate overall PnL percentage
+        overall_pnl_percentage = (total_unrealized_profit / total_notional) if total_notional else 0
+        print(f"Overall PnL Percentage: {overall_pnl_percentage*100:.2f}%")
+
+
+        # Check if overall profit exceeds the threshold or if there are losses but total profit is positive
+        if overall_pnl_percentage >= 0.0025:
+            for position in positions:
+                positionAmt = float(position.get('positionAmt', 0))
+                if positionAmt != 0:
+                    symbol = position.get('symbol')
+                    entryPrice = float(position.get('entryPrice', '0'))
+                    current_price_info = client.futures_symbol_ticker(symbol=symbol)
+                    markPrice = float(current_price_info['price']) if current_price_info else 0
+                    side = 'SELL' if positionAmt > 0 else 'BUY'
+                    quantity = abs(positionAmt)
+                    
+                    # Execute market order to close the position
+                    order_response = client.futures_create_order(symbol=symbol, side=side, type='MARKET', quantity=quantity)
+                    
+                    closed_positions.append({
+                        'symbol': symbol,
+                        'positionAmt': positionAmt,
+                        'entryPrice': entryPrice,
+                        'closingPrice': markPrice,
+                        'pnl_percentage': overall_pnl_percentage,
+                        'order_response': order_response
+                    })
+                    print(f"Closed position for {symbol} due to overall profit.")
+        else:
+            # If the overall profit does not meet the threshold, list positions for no action
+            for position in positions:
+                positionAmt = float(position.get('positionAmt', 0))
+                if positionAmt != 0:
+                    symbol = position.get('symbol')
+                    no_action_positions.append({
+                        'symbol': symbol,
+                        'positionAmt': positionAmt,
+                        'action': 'No action taken due to insufficient overall profit'
+                    })
+                    print(f"No action taken for {symbol} due to insufficient overall profit.")
+    
     except BinanceAPIException as e:
-        print(f"Error closing positions for {symbol}: {e}")
+        print(f"Error while attempting to close positions: {e}")
         return {'error': str(e)}
 
     return {
         'closed_positions': closed_positions,
         'no_action_positions': no_action_positions
     }
+
+
+
+# def close_positions_based_on_profit_loss(client, profit_threshold=0.01):
+
+#     closed_positions = []
+#     no_action_positions = []
+
+#     try:
+#         # Get current open positions
+#         account_info = client.futures_account()
+#         positions = account_info.get('positions', [])
+#         for position in positions:
+#             positionAmt = float(position.get('positionAmt', 0))
+
+#             if positionAmt != 0:
+#                 symbol = position.get('symbol')
+#                 entryPrice = float(position.get('entryPrice', '0'))
+#                 # Fetch current markPrice for a more accurate calculation
+#                 current_price_info = client.futures_symbol_ticker(symbol=symbol)
+#                 markPrice = float(current_price_info['price']) if current_price_info else 0
+#                 unRealizedProfit = float(position.get('unrealizedProfit', '0'))
+
+#                 # Calculate notional using markPrice
+#                 notional = abs(positionAmt * markPrice)
+
+#                 # Calculate PnL percentage
+#                 pnl_percentage = (unRealizedProfit / notional) if notional else 0
+
+#                 print(f"Checking position for {symbol}: PnL%={pnl_percentage*100:.2f}% vs. Threshold={profit_threshold*100}%")
+
+#                 if pnl_percentage >= profit_threshold:
+#                     side = 'SELL' if positionAmt > 0 else 'BUY'
+#                     quantity = abs(positionAmt)
+#                     print(f"Attempting to close {symbol} | Side: {side} | Quantity: {quantity}")
+#                     order_response = client.futures_create_order(symbol=symbol, side=side, type='MARKET', quantity=quantity)
+
+#                     print(f"Order response for {symbol}: {order_response}")
+
+#                     closed_positions.append({
+#                         'symbol': symbol,
+#                         'positionAmt': positionAmt,
+#                         'entryPrice': entryPrice,
+#                         'closingPrice': markPrice,
+#                         'pnl_percentage': pnl_percentage,
+#                         'order_response': order_response
+#                     })
+#                 else:
+#                     print(f"No action taken for {symbol}: PnL%={pnl_percentage*100:.2f}%")
+#                     no_action_positions.append({
+#                         'symbol': symbol,
+#                         'positionAmt': positionAmt,
+#                         'entryPrice': entryPrice,
+#                         'currentPrice': markPrice,
+#                         'pnl_percentage': pnl_percentage,
+#                         'action': 'No action taken'
+#                     })
+#     except BinanceAPIException as e:
+#         print(f"Error closing positions for {symbol}: {e}")
+#         return {'error': str(e)}
+
+#     return {
+#         'closed_positions': closed_positions,
+#         'no_action_positions': no_action_positions
+#     }
 
 
 
