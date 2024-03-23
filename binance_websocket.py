@@ -12,10 +12,8 @@ from aiogram import Bot
 from telegram import send_telegram_message, format_message
 from trading_logic import trading_decision_based_on_conditions
 from orderbook_analysis import fetch_order_book, analyze_order_book
-from candle_stick_analysis import fetch_historical_data, estimate_price_movement
 from trading_execution import client as client_binance, execute_order_based_on_signal_and_balance, close_positions_based_on_profit_loss
-
-
+from candle_stick_analysis import fetch_historical_data, estimate_price_movement, is_hammer_or_hangingman, determine_trend, check_for_engulfing_pattern, is_dark_cloud_cover, detect_candlestick_piercing_on_in_neck_thrusting_pattern
 
 # Load environment variables from .env file
 load_dotenv()
@@ -278,6 +276,8 @@ async def analyze_all_gainers_order_book(top_gainers):
 
         interval = "15m"
 
+        limit = 100 #100 candle stick 15m
+
         # Fetch order book data
         order_book = fetch_order_book(symbol)
 
@@ -285,11 +285,33 @@ async def analyze_all_gainers_order_book(top_gainers):
         order_book_trend = analyze_order_book(order_book)
 
         # Fetch Historical data
-        historical_data = fetch_historical_data(symbol, interval)
+        historical_data = fetch_historical_data(symbol, interval, limit)
+
+        # Fetch the latest candle stick 15m:
+
+        latest_candlestick = historical_data[-1]
+
+        context, average_close = determine_trend(symbol, interval, limit)
+
+        check_hammer_or_hangingman = is_hammer_or_hangingman(latest_candlestick, context)
+
+        engulfing_pattern = check_for_engulfing_pattern(historical_data)
+
+        check_dark_cloud = is_dark_cloud_cover(historical_data)
+
+        check_piercing_pattern = detect_candlestick_piercing_on_in_neck_thrusting_pattern(historical_data)
+
+        print(f"latest candle stick {symbol} is: ", str(latest_candlestick))
+        print(f"trend of {symbol} is: ", context)
+        print(f"avg price of {symbol} is: ", average_close)
+        print(f"latest candle stick {symbol} is: ", check_hammer_or_hangingman)
+        print(f"The latest pattern for {symbol} detected is {engulfing_pattern}.")
+        print(f"check dark cloud cover for {symbol} detected is {check_dark_cloud}.")
+        print(f"check_piercing_pattern for {symbol} detected is {check_piercing_pattern}.")
 
         # Estimate price movement
 
-        price_movement = estimate_price_movement(symbol, interval, order_book)
+        price_movement = estimate_price_movement(symbol, interval, order_book, limit)
 
         trading_signal = trading_decision_based_on_conditions(price_movement, order_book_trend[0])
 
@@ -363,15 +385,17 @@ async def main():
             # Here is where you'd integrate the trading execution logic
             # Execute trading decisions based on the analysis and trading signal
             # Make sure to check your account balance and trading conditions before executing
-            for signal in top_gainer_analysis:
+            #################
+            # for signal in top_gainer_analysis:
                 # print("signal: ", signal['trading_signal'])
-                trade_response = execute_order_based_on_signal_and_balance(signal['trading_signal'], client_binance)
-                print(f"Trade execution response: {trade_response}")
+                # trade_response = execute_order_based_on_signal_and_balance(signal['trading_signal'], client_binance)
+                # print(f"Trade execution response: {trade_response}")
 
             # This function checks all your open positions and decides whether to close them
-            print("Start to check and close position...")
-            close_positions_response = close_positions_based_on_profit_loss(client_binance, profit_threshold=0.01)
-            print(f"Close positions response: {close_positions_response}")
+            # print("Start to check and close position...")
+            # close_positions_response = close_positions_based_on_profit_loss(client_binance)
+            # print(f"Close positions response: {close_positions_response}")
+            ##################
 
             if top_gainer_symbols:
                 # Cancel the existing WebSocket task and start a new one with updated symbols

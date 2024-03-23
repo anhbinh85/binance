@@ -155,7 +155,7 @@ def execute_order_based_on_signal_and_balance(trading_signal, client):
         return {f'{symbol} is not supported for futures trading.'}
 
 
-def close_positions_based_on_profit_loss(client, profit_threshold=0.01):
+def close_positions_based_on_profit_loss(client, profit_threshold=0.02, loss_threshold=-0.02):
     closed_positions = []
     no_action_positions = []
 
@@ -188,7 +188,7 @@ def close_positions_based_on_profit_loss(client, profit_threshold=0.01):
 
 
 
-                if pnl_percentage >= profit_threshold:
+                if pnl_percentage >= profit_threshold or pnl_percentage <= loss_threshold:
 
                     side = 'SELL' if positionAmt > 0 else 'BUY'
                     quantity = abs(positionAmt)
@@ -224,7 +224,7 @@ def close_positions_based_on_profit_loss(client, profit_threshold=0.01):
 
 
         # Check if overall profit exceeds the threshold or if there are losses but total profit is positive
-        if overall_pnl_percentage >= 0.0025:
+        if overall_pnl_percentage >= 0.01:
             for position in positions:
                 positionAmt = float(position.get('positionAmt', 0))
                 if positionAmt != 0:
