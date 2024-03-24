@@ -1,15 +1,15 @@
-File created on: 2024-03-23 16:53:46
+File created on: 2024-03-24 13:14:01
 Total unique symbols: 403
 
-Symbol: BCHUSDT, Start Price: 442.4, Start Time: 2024-03-23 09:51:52.483000, End Price: 447.0, End Time: 2024-03-23 09:52:51.897000, Price Change (%): 1.0397830018083234
-Symbol: OAXUSDT, Start Price: 0.2335, Start Time: 2024-03-23 09:51:52.220000, End Price: 0.2356, End Time: 2024-03-23 09:52:51.813000, Price Change (%): 0.8993576017130581
-Symbol: BOMEUSDT, Start Price: 0.014114, Start Time: 2024-03-23 09:51:52.025000, End Price: 0.014206, End Time: 2024-03-23 09:52:52.060000, Price Change (%): 0.6518350573898263
-Symbol: XECUSDT, Start Price: 5.26e-05, Start Time: 2024-03-23 09:51:51.255000, End Price: 5.29e-05, End Time: 2024-03-23 09:52:51.311000, Price Change (%): 0.5703422053231949
-Symbol: XTZUSDT, Start Price: 1.26, Start Time: 2024-03-23 09:51:51.014000, End Price: 1.267, End Time: 2024-03-23 09:52:51.283000, Price Change (%): 0.5555555555555473
-Symbol: POLYXUSDT, Start Price: 0.4378, Start Time: 2024-03-23 09:51:52.245000, End Price: 0.4402, End Time: 2024-03-23 09:52:51.303000, Price Change (%): 0.5481955230698853
-Symbol: HIFIUSDT, Start Price: 1.133, Start Time: 2024-03-23 09:51:52.384000, End Price: 1.139, End Time: 2024-03-23 09:52:51.957000, Price Change (%): 0.5295675198587825
-Symbol: ONTUSDT, Start Price: 0.3406, Start Time: 2024-03-23 09:51:51.733000, End Price: 0.3424, End Time: 2024-03-23 09:52:51.413000, Price Change (%): 0.5284791544333436
-Symbol: LTCUSDT, Start Price: 84.43, Start Time: 2024-03-23 09:51:52.330000, End Price: 84.87, End Time: 2024-03-23 09:52:51.366000, Price Change (%): 0.521141774250856
-Symbol: CVPUSDT, Start Price: 0.5745, Start Time: 2024-03-23 09:51:52.050000, End Price: 0.5769, End Time: 2024-03-23 09:52:51.713000, Price Change (%): 0.4177545691905931
-latest top gainers in database: {'_id': ObjectId('65fea6a9f959bb819032f0c0'), 'startPrice': 442.4, 'endPrice': 447.0, 'startTime': '2024-03-23 09:51:52.483000', 'endTime': '2024-03-23 09:52:51.897000', 'symbol': 'BCHUSDT', 'priceChangePercent': 1.0397830018083234, 'recordedAt': datetime.datetime(2024, 3, 23, 9, 53, 45, 659000)}
+Symbol: BTTCUSDT, Start Price: 1.47e-06, Start Time: 2024-03-24 05:59:00.378000, End Price: 1.53e-06, End Time: 2024-03-24 06:13:59.902000, Price Change (%): 4.081632653061229
+Symbol: FTTUSDT, Start Price: 2.0515, Start Time: 2024-03-24 06:09:07.077000, End Price: 2.0697, End Time: 2024-03-24 06:13:53.802000, Price Change (%): 0.8871557397026673
+Symbol: NULSUSDT, Start Price: 0.6658, Start Time: 2024-03-24 05:59:00.184000, End Price: 0.6703, End Time: 2024-03-24 06:13:59.175000, Price Change (%): 0.6758786422349143
+Symbol: TRUUSDT, Start Price: 0.11204, Start Time: 2024-03-24 05:59:00.426000, End Price: 0.11277, End Time: 2024-03-24 06:13:59.677000, Price Change (%): 0.6515530167797167
+Symbol: XEMUSDT, Start Price: 0.04733, Start Time: 2024-03-24 06:03:47.487000, End Price: 0.04758, End Time: 2024-03-24 06:13:59.065000, Price Change (%): 0.5282062117050502
+Symbol: XECUSDT, Start Price: 6.18e-05, Start Time: 2024-03-24 06:03:40.340000, End Price: 6.21e-05, End Time: 2024-03-24 06:08:59.919000, Price Change (%): 0.4854368932038953
+Symbol: ORNUSDT, Start Price: 2.1426, Start Time: 2024-03-24 06:09:15.414000, End Price: 2.1522, End Time: 2024-03-24 06:13:41.336000, Price Change (%): 0.44805376645198713
+Symbol: APTUSDT, Start Price: 16.2501, Start Time: 2024-03-24 05:59:00.356000, End Price: 16.2967, End Time: 2024-03-24 06:13:59.315000, Price Change (%): 0.2867674660463722
+Symbol: GTCUSDT, Start Price: 1.807, Start Time: 2024-03-24 06:09:07.536000, End Price: 1.812, End Time: 2024-03-24 06:13:58.711000, Price Change (%): 0.2767017155506428
+Symbol: DUSKUSDT, Start Price: 0.4165, Start Time: 2024-03-24 06:03:40.895000, End Price: 0.4172, End Time: 2024-03-24 06:09:00.684000, Price Change (%): 0.16806722689076448
+latest top gainers in database: {'_id': ObjectId('65ffc4a8e478d6deb83c2c86'), 'startPrice': 1.47e-06, 'endPrice': 1.53e-06, 'startTime': '2024-03-24 05:59:00.378000', 'endTime': '2024-03-24 06:13:59.902000', 'symbol': 'BTTCUSDT', 'priceChangePercent': 4.081632653061229, 'recordedAt': datetime.datetime(2024, 3, 24, 6, 14, 0, 866000)}
 

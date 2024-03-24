@@ -13,7 +13,7 @@ from telegram import send_telegram_message, format_message
 from trading_logic import trading_decision_based_on_conditions
 from orderbook_analysis import fetch_order_book, analyze_order_book
 from trading_execution import client as client_binance, execute_order_based_on_signal_and_balance, close_positions_based_on_profit_loss
-from candle_stick_analysis import fetch_historical_data, estimate_price_movement, is_hammer_or_hangingman, determine_trend, check_for_engulfing_pattern, is_dark_cloud_cover, detect_candlestick_piercing_on_in_neck_thrusting_pattern
+from candle_stick_analysis import fetch_historical_data, estimate_price_movement, is_hammer_or_hangingman, determine_trend, check_for_engulfing_pattern, is_dark_cloud_cover, detect_candlestick_piercing_on_in_neck_thrusting_pattern, detect_stars_patterns
 
 # Load environment variables from .env file
 load_dotenv()
@@ -301,6 +301,8 @@ async def analyze_all_gainers_order_book(top_gainers):
 
         check_piercing_pattern = detect_candlestick_piercing_on_in_neck_thrusting_pattern(historical_data)
 
+        check_stars_pattern = detect_stars_patterns(historical_data)
+
         print(f"latest candle stick {symbol} is: ", str(latest_candlestick))
         print(f"trend of {symbol} is: ", context)
         print(f"avg price of {symbol} is: ", average_close)
@@ -308,6 +310,7 @@ async def analyze_all_gainers_order_book(top_gainers):
         print(f"The latest pattern for {symbol} detected is {engulfing_pattern}.")
         print(f"check dark cloud cover for {symbol} detected is {check_dark_cloud}.")
         print(f"check_piercing_pattern for {symbol} detected is {check_piercing_pattern}.")
+        print(f"check_stars_pattern for {symbol} detected is {check_stars_pattern}.")
 
         # Estimate price movement
 

@@ -178,6 +178,33 @@ def is_hammer_or_hangingman(candle, context):
     else:
         return "Neither a hammer nor a hanging man candlestick."
 
+
+def determine_trend_with_moving_average(historical_data, lookback_periods=5):
+    
+    """
+    Determine the trend using a simple moving average of the close prices over the specified lookback period.
+
+    :param historical_data: List of dictionaries containing open, high, low, close, volume data.
+    :param lookback_periods: Number of periods to look back for the moving average.
+    :return: String indicating the trend ('uptrend', 'downtrend', or 'sideways/uncertain').
+    """
+    if len(historical_data) < lookback_periods:
+        # Not enough data to determine the trend
+        return 'sideways/uncertain'
+
+    # Extract close prices and calculate the moving average
+    close_prices = [candle['close'] for candle in historical_data[-lookback_periods:]]
+    moving_average = sum(close_prices) / lookback_periods
+
+    # Determine the trend based on the last close price relative to the moving average
+    last_close_price = historical_data[-1]['close']
+    if last_close_price > moving_average:
+        return 'uptrend'
+    elif last_close_price < moving_average:
+        return 'downtrend'
+    else:
+        return 'sideways/uncertain'
+
 def determine_trend(symbol, interval, lookback_periods):
     """
     Determine if the trend is up or down based on the last 'n' candlesticks.
@@ -265,7 +292,7 @@ def check_for_engulfing_pattern(historical_data):
         return "bearish engulfing"
 
     else:
-        return "no pattern"
+        return "no engulfing pattern"
 
 def is_dark_cloud_cover(historical_data):
     """
@@ -330,17 +357,71 @@ def detect_candlestick_piercing_on_in_neck_thrusting_pattern(historical_data):
         if latest_candle['open'] < prev_candle['close'] and latest_candle['close'] > prev_candle['close'] and latest_candle['close'] < (prev_candle['open'] + prev_body / 2):
             return "Thrusting Pattern detected"
 
-    return "No specific pattern detected"
+    return "No specific piercing_on_in_neck_thrusting pattern detected"
 
-# historical_data = fetch_historical_data("ETHUSDT", "15m", 100)
+def detect_stars_patterns(historical_data):
+
+    if len(historical_data) < 3:
+        return "Insufficient data for pattern detection."
+
+    # Latest three candles
+    first_candle = historical_data[-3]
+    second_candle = historical_data[-2]
+    third_candle = historical_data[-1]
+
+    # Common calculations
+    first_body = abs(first_candle['close'] - first_candle['open'])
+    second_body = abs(second_candle['close'] - second_candle['open'])
+    third_body = abs(third_candle['close'] - third_candle['open'])
+    
+    first_is_bullish = first_candle['close'] > first_candle['open']
+    third_is_bullish = third_candle['close'] > third_candle['open']
+    
+    second_is_doji = second_body <= ((second_candle['high'] - second_candle['low']) * 0.1)
+
+    # Checking for Morning Star and Doji Morning Star
+    if not first_is_bullish and third_is_bullish:
+        if (second_candle['high'] < first_candle['low'] and third_candle['open'] > second_candle['close'] and
+                third_candle['close'] > (first_candle['open'] + (first_body / 2))):
+            if second_is_doji:
+                return "Doji Morning Star"
+            else:
+                return "Morning Star"
+
+    # Checking for Evening Star and Doji Evening Star
+    if first_is_bullish and not third_is_bullish:
+        if (second_candle['high'] > first_candle['high'] and third_candle['open'] < second_candle['close'] and
+                third_candle['close'] < (first_candle['close'] - (first_body / 2))):
+            if second_is_doji:
+                return "Doji Evening Star"
+            else:
+                return "Evening Star"
+    
+    # Checking for Shooting Star
+    if third_body / (third_candle['high'] - third_candle['low']) <= 0.2:
+        # Small body
+        upper_shadow = third_candle['high'] - max(third_candle['open'], third_candle['close'])
+        lower_shadow = min(third_candle['open'], third_candle['close']) - third_candle['low']
+        body_top = max(third_candle['open'], third_candle['close'])
+        
+        if first_is_bullish and upper_shadow > (2 * third_body) and lower_shadow < third_body:
+            return "Shooting Star"
+
+    return "No recognized STARS pattern found."
+
+# historical_data = fetch_historical_data("TRUUSDT", "15m", 100)
+# print(historical_data)
 # engulfing_pattern = check_for_engulfing_pattern(historical_data)
-# print(f"The latest pattern detected is {engulfing_pattern}.")
+# print(f"The latest engulfing pattern detected is {engulfing_pattern}.")
 
 # dark_cloud = is_dark_cloud_cover(historical_data)
 # print(f"Check dark cloud: {dark_cloud}")
 
-# check_pattern = detect_candlestick_piercing_on_in_neck_thrusting_pattern(historical_data)
-# print(check_pattern)
+# check_piercing_pattern = detect_candlestick_piercing_on_in_neck_thrusting_pattern(historical_data)
+# print(f"check piercing or on_in_neck or thrusting {check_piercing_pattern}")
+
+# check_stars_pattern = detect_stars_patterns(historical_data)
+# print(f"stars pattern: {check_stars_pattern}")
 
 
 # candle_1 = fetch_historical_data("BTCUSDT", "15m", 1)[0]
