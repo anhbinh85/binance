@@ -409,6 +409,44 @@ def detect_stars_patterns(historical_data):
 
     return "No recognized STARS pattern found."
 
+def detect_harami_and_cross(historical_data):
+    if len(historical_data) < 2:
+        return "Insufficient data for pattern detection."
+
+    # Get the last two candles
+    prev_candle = historical_data[-2]
+    last_candle = historical_data[-1]
+
+    prev_body = abs(prev_candle['close'] - prev_candle['open'])
+    last_body = abs(last_candle['close'] - last_candle['open'])
+
+    # Determine the direction of the candles
+    prev_bullish = prev_candle['close'] > prev_candle['open']
+    last_bullish = last_candle['close'] > last_candle['open']
+
+    # Check for Harami pattern
+    # Last candle's body is fully within the previous candle's body, but direction is opposite
+    if (last_candle['open'] > prev_candle['open'] and last_candle['close'] < prev_candle['close']) or \
+       (last_candle['open'] < prev_candle['open'] and last_candle['close'] > prev_candle['close']):
+        if prev_bullish != last_bullish:
+            # Bullish Harami: previous candle is bearish, last is bullish
+            if not prev_bullish and last_bullish:
+                return "Bullish Harami"
+            # Bearish Harami: previous candle is bullish, last is bearish
+            else:
+                return "Bearish Harami"
+
+    # Check for Harami Cross pattern
+    # Last candle is a Doji and is within the body of the previous candle
+    if (last_body / (last_candle['high'] - last_candle['low']) <= 0.1) and \
+       (last_candle['high'] < prev_candle['high'] and last_candle['low'] > prev_candle['low']):
+        if prev_bullish:
+            return "Bearish Harami Cross"
+        else:
+            return "Bullish Harami Cross"
+
+    return "No recognizable pattern"
+
 # historical_data = fetch_historical_data("TRUUSDT", "15m", 100)
 # print(historical_data)
 # engulfing_pattern = check_for_engulfing_pattern(historical_data)

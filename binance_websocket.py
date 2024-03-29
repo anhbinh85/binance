@@ -13,7 +13,8 @@ from telegram import send_telegram_message, format_message
 from trading_logic import trading_decision_based_on_conditions
 from orderbook_analysis import fetch_order_book, analyze_order_book
 from trading_execution import client as client_binance, execute_order_based_on_signal_and_balance, close_positions_based_on_profit_loss
-from candle_stick_analysis import fetch_historical_data, estimate_price_movement, is_hammer_or_hangingman, determine_trend, check_for_engulfing_pattern, is_dark_cloud_cover, detect_candlestick_piercing_on_in_neck_thrusting_pattern, detect_stars_patterns
+from talib_analysis import TA_Candle_Stick_Recognition
+from candle_stick_analysis import *
 
 # Load environment variables from .env file
 load_dotenv()
@@ -287,8 +288,16 @@ async def analyze_all_gainers_order_book(top_gainers):
         # Fetch Historical data
         historical_data = fetch_historical_data(symbol, interval, limit)
 
-        # Fetch the latest candle stick 15m:
+        # Ta_lib:
 
+        print(f"Pattern Recognition from TA-LIB....for {symbol}")
+        candle_stick_recognition = TA_Candle_Stick_Recognition(historical_data[-3:])
+
+        candle_stick_recognition.detect_patterns()
+
+
+        # Fetch the latest candle stick 15m:
+        print("Pattern Recognition from manual analysis...")
         latest_candlestick = historical_data[-1]
 
         context, average_close = determine_trend(symbol, interval, limit)
@@ -303,6 +312,8 @@ async def analyze_all_gainers_order_book(top_gainers):
 
         check_stars_pattern = detect_stars_patterns(historical_data)
 
+        check_harami = detect_harami_and_cross(historical_data)
+
         print(f"latest candle stick {symbol} is: ", str(latest_candlestick))
         print(f"trend of {symbol} is: ", context)
         print(f"avg price of {symbol} is: ", average_close)
@@ -311,6 +322,7 @@ async def analyze_all_gainers_order_book(top_gainers):
         print(f"check dark cloud cover for {symbol} detected is {check_dark_cloud}.")
         print(f"check_piercing_pattern for {symbol} detected is {check_piercing_pattern}.")
         print(f"check_stars_pattern for {symbol} detected is {check_stars_pattern}.")
+        print(f"check_harami_pattern for {symbol} detected is {check_harami}.")
 
         # Estimate price movement
 
