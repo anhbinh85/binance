@@ -30,20 +30,25 @@ class TA_Candle_Stick_Recognition:
         # Each method returns an array with the pattern detection result for each candle
         patterns = {
             'Hammer': talib.CDLHAMMER(self.opens, self.highs, self.lows, self.closes),
-            'Hanging Man': talib.CDLHANGINGMAN(self.opens, self.highs, self.lows, self.closes),
-            'Shooting Star': talib.CDLSHOOTINGSTAR(self.opens, self.highs, self.lows, self.closes),
+            'Hanging_Man': talib.CDLHANGINGMAN(self.opens, self.highs, self.lows, self.closes),
+            'Shooting_Star': talib.CDLSHOOTINGSTAR(self.opens, self.highs, self.lows, self.closes),
             'Engulfing': talib.CDLENGULFING(self.opens, self.highs, self.lows, self.closes),
-            'Dark Cloud Cover': talib.CDLDARKCLOUDCOVER(self.opens, self.highs, self.lows, self.closes, penetration=0),
+            'Dark_Cloud_Cover': talib.CDLDARKCLOUDCOVER(self.opens, self.highs, self.lows, self.closes, penetration=0),
             'Piercing': talib.CDLPIERCING(self.opens, self.highs, self.lows, self.closes),
-            'In-Neck': talib.CDLINNECK(self.opens, self.highs, self.lows, self.closes),
-            'On-Neck': talib.CDLONNECK(self.opens, self.highs, self.lows, self.closes),
+            'In_Neck': talib.CDLINNECK(self.opens, self.highs, self.lows, self.closes),
+            'On_Neck': talib.CDLONNECK(self.opens, self.highs, self.lows, self.closes),
             'Thrusting': talib.CDLTHRUSTING(self.opens, self.highs, self.lows, self.closes),
-            'Morning Stars': talib.CDLMORNINGSTAR(self.opens, self.highs, self.lows, self.closes),
-            'Morning Doji Stars': talib.CDLMORNINGDOJISTAR(self.opens, self.highs, self.lows, self.closes),
-            'Evening Stars': talib.CDLEVENINGSTAR(self.opens, self.highs, self.lows, self.closes),
-            'Evening Doji Stars': talib.CDLEVENINGDOJISTAR(self.opens, self.highs, self.lows, self.closes),
+            'Morning_Stars': talib.CDLMORNINGSTAR(self.opens, self.highs, self.lows, self.closes),
+            'Morning_Doji_Stars': talib.CDLMORNINGDOJISTAR(self.opens, self.highs, self.lows, self.closes),
+            'Evening_Stars': talib.CDLEVENINGSTAR(self.opens, self.highs, self.lows, self.closes),
+            'Evening_Doji_Stars': talib.CDLEVENINGDOJISTAR(self.opens, self.highs, self.lows, self.closes),
             'Harami': talib.CDLHARAMI(self.opens, self.highs, self.lows, self.closes),
-            'Harami-cross': talib.CDLHARAMICROSS(self.opens, self.highs, self.lows, self.closes)
+            'Harami_cross': talib.CDLHARAMICROSS(self.opens, self.highs, self.lows, self.closes),
+            "Belt-hold": talib.CDLBELTHOLD(self.opens, self.highs, self.lows, self.closes),
+            "Upside_Gap_Two_Crows":talib.CDLUPSIDEGAP2CROWS(self.opens, self.highs, self.lows, self.closes),
+            "Three_Black_Crows":talib.CDL3BLACKCROWS(self.opens, self.highs, self.lows, self.closes),
+            "Three_Advancing_White_Soldiers":talib.CDL3WHITESOLDIERS(self.opens, self.highs, self.lows, self.closes),
+            "Counterattack":talib.CDLCOUNTERATTACK(self.opens, self.highs, self.lows, self.closes)
         }
 
         # Check each pattern in the latest candle and print result

@@ -447,6 +447,200 @@ def detect_harami_and_cross(historical_data):
 
     return "No recognizable pattern"
 
+def check_tweezers_top(historical_data):
+    """Checks if the latest two candles form a Tweezers Top pattern."""
+    if len(historical_data) < 2:
+        return "Insufficient data for pattern detection."
+
+    # Get the last two candlesticks
+    prev_candle = historical_data[-2]
+    last_candle = historical_data[-1]
+
+    # Criteria for Tweezers Top: both candles reach the same high price point
+    if (prev_candle['high'] == last_candle['high'] and
+            prev_candle['close'] > prev_candle['open'] and
+            last_candle['close'] < last_candle['open']):
+        return "Tweezers Top detected"
+    return "No Tweezers Top detected"
+
+def check_tweezers_bottom(historical_data):
+    """Checks if the latest two candles form a Tweezers Bottom pattern."""
+    if len(historical_data) < 2:
+        return "Insufficient data for pattern detection."
+
+    # Get the last two candlesticks
+    prev_candle = historical_data[-2]
+    last_candle = historical_data[-1]
+
+    # Criteria for Tweezers Bottom: both candles reach the same low price point
+    if (prev_candle['low'] == last_candle['low'] and
+            prev_candle['close'] < prev_candle['open'] and
+            last_candle['close'] > last_candle['open']):
+        return "Tweezers Bottom detected"
+    return "No Tweezers Bottom detected"
+
+def check_belt_hold(historical_data):
+    """Checks for a Belt-hold (bullish or bearish) pattern in the latest candle."""
+    if len(historical_data) < 1:
+        return "Insufficient data for pattern detection."
+
+    # Get the latest candle
+    last_candle = historical_data[-1]
+
+    # Criteria for Belt-hold
+    body_length = abs(last_candle['close'] - last_candle['open'])
+    total_length = last_candle['high'] - last_candle['low']
+
+    # A large body, small shadows
+    if body_length / total_length > 0.8:
+        if last_candle['close'] > last_candle['open']:
+            return "Bullish Belt-hold detected"
+        elif last_candle['close'] < last_candle['open']:
+            return "Bearish Belt-hold detected"
+    return "No Belt-hold detected"
+
+def check_upside_gap_two_crows(historical_data):
+    """Checks for an Upside-Gap Two Crows pattern in the latest three candles."""
+    if len(historical_data) < 3:
+        return "Insufficient data for pattern detection."
+
+    first_candle = historical_data[-3]
+    second_candle = historical_data[-2]
+    last_candle = historical_data[-1]
+
+    # Criteria for Upside-Gap Two Crows
+    if (first_candle['close'] > first_candle['open'] and  # First candle is bullish
+        second_candle['open'] > first_candle['close'] and  # Gap up
+        second_candle['close'] < second_candle['open'] and  # Second candle is bearish
+        last_candle['open'] > first_candle['close'] and
+        last_candle['close'] < second_candle['open'] and  # Fills the gap
+        last_candle['close'] > first_candle['open']):
+        return "Upside-Gap Two Crows detected"
+    return "No Upside-Gap Two Crows detected"
+
+def check_three_black_crows(historical_data):
+    """Checks for a Three Black Crows pattern."""
+    if len(historical_data) < 3:
+        return "Insufficient data for pattern detection."
+
+    three_crows = historical_data[-3:]
+
+    # All three candles are bearish and each closes progressively lower
+    if all(candle['close'] < candle['open'] for candle in three_crows) and \
+       all(three_crows[i]['close'] < three_crows[i-1]['close'] for i in range(1, 3)):
+        return "Three Black Crows detected"
+    return "No Three Black Crows detected"
+
+def check_three_advancing_white_soldiers(historical_data):
+    """Checks for a Three Advancing White Soldiers pattern."""
+    if len(historical_data) < 3:
+        return "Insufficient data for pattern detection."
+
+    three_soldiers = historical_data[-3:]
+
+    # All three candles are bullish and each closes progressively higher
+    if all(candle['close'] > candle['open'] for candle in three_soldiers) and \
+       all(three_soldiers[i]['close'] > three_soldiers[i-1]['close'] for i in range(1, 3)):
+        return "Three Advancing White Soldiers detected"
+    return "No Three Advancing White Soldiers detected"
+
+def check_buddha_top_bottom(historical_data, top=True):
+    """Checks for a Three Buddha Top or Bottom pattern based on whether 'top' is True or False."""
+    if len(historical_data) < 3:
+        return "Insufficient data for pattern detection."
+
+    # Assuming an arbitrary size and formation for demonstration purposes
+    if top:
+        # A top is a high peak surrounded by lower highs
+        if all(historical_data[i]['high'] < historical_data[i+1]['high'] for i in [-3, -2]) and \
+           all(historical_data[i]['high'] > historical_data[i+1]['high'] for i in [-1, 0]):
+            return "Three Buddha Top detected"
+    else:
+        # A bottom is a low trough surrounded by higher lows
+        if all(historical_data[i]['low'] > historical_data[i+1]['low'] for i in [-3, -2]) and \
+           all(historical_data[i]['low'] < historical_data[i+1]['low'] for i in [-1, 0]):
+            return "Three Buddha Bottom detected"
+    return "No Buddha Top/Bottom detected"
+
+def check_counterattack_lines(historical_data):
+    """Checks for Bullish or Bearish Counterattack line patterns."""
+    if len(historical_data) < 2:
+        return "Insufficient data for pattern detection."
+
+    prev_candle = historical_data[-2]
+    last_candle = historical_data[-1]
+
+    # Bullish Counterattack line
+    if prev_candle['close'] < prev_candle['open'] and last_candle['close'] > last_candle['open'] and \
+       abs(prev_candle['close'] - last_candle['close']) < 0.01 * last_candle['close']:
+        return "Bullish Counterattack line detected"
+    # Bearish Counterattack line
+    elif prev_candle['close'] > prev_candle['open'] and last_candle['close'] < last_candle['open'] and \
+         abs(prev_candle['close'] - last_candle['close']) < 0.01 * last_candle['close']:
+        return "Bearish Counterattack line detected"
+
+    return "No Counterattack lines detected"
+
+def check_dumpling_top(historical_data):
+    """Checks for a Dumpling Top pattern, characterized by a rounding top formation."""
+    if len(historical_data) < 5:
+        return "Insufficient data for pattern detection."
+
+    # Looking for a gradual decline after a peak, indicating a rounded top like a dumpling
+    peak = max(historical_data, key=lambda x: x['high'])
+    peak_index = historical_data.index(peak)
+
+    # Ensure peak is not at the edges
+    if 1 < peak_index < len(historical_data) - 3:
+        post_peak_candles = historical_data[peak_index + 1:peak_index + 4]
+        if all(post_peak_candles[i]['high'] < post_peak_candles[i - 1]['high'] for i in range(1, 3)):
+            return "Dumpling Top detected"
+    return "No Dumpling Top detected"
+
+def check_frypan_bottom(historical_data):
+    """Checks for a Frypan Bottom pattern, characterized by a gradual rounding bottom formation."""
+    if len(historical_data) < 5:
+        return "Insufficient data for pattern detection."
+
+    # Looking for a gradual increase after a trough, indicating a rounded bottom like a frypan
+    trough = min(historical_data, key=lambda x: x['low'])
+    trough_index = historical_data.index(trough)
+
+    # Ensure trough is not at the edges
+    if 1 < trough_index < len(historical_data) - 3:
+        post_trough_candles = historical_data[trough_index + 1:trough_index + 4]
+        if all(post_trough_candles[i]['low'] > post_trough_candles[i - 1]['low'] for i in range(1, 3)):
+            return "Frypan Bottom detected"
+    return "No Frypan Bottom detected"
+
+def check_tower_top(historical_data):
+    """Checks for a Tower Top pattern, characterized by a sharp rise followed by a sharp decline."""
+    if len(historical_data) < 5:
+        return "Insufficient data for pattern detection."
+
+    middle_index = len(historical_data) // 2
+    rising_phase = historical_data[:middle_index]
+    falling_phase = historical_data[middle_index:]
+
+    if all(rising_phase[i]['close'] > rising_phase[i - 1]['close'] for i in range(1, len(rising_phase))) and \
+       all(falling_phase[i]['close'] < falling_phase[i - 1]['close'] for i in range(1, len(falling_phase))):
+        return "Tower Top detected"
+    return "No Tower Top detected"
+
+def check_tower_bottom(historical_data):
+    """Checks for a Tower Bottom pattern, characterized by a sharp decline followed by a sharp rise."""
+    if len(historical_data) < 5:
+        return "Insufficient data for pattern detection."
+
+    middle_index = len(historical_data) // 2
+    falling_phase = historical_data[:middle_index]
+    rising_phase = historical_data[middle_index:]
+
+    if all(falling_phase[i]['close'] < falling_phase[i - 1]['close'] for i in range(1, len(falling_phase))) and \
+       all(rising_phase[i]['close'] > rising_phase[i - 1]['close'] for i in range(1, len(rising_phase))):
+        return "Tower Bottom detected"
+    return "No Tower Bottom detected"
+
 # historical_data = fetch_historical_data("TRUUSDT", "15m", 100)
 # print(historical_data)
 # engulfing_pattern = check_for_engulfing_pattern(historical_data)
