@@ -291,7 +291,7 @@ async def analyze_all_gainers_order_book(top_gainers):
         # Ta_lib:
 
         print(f"Pattern Recognition from TA-LIB....for {symbol}")
-        candle_stick_recognition = TA_Candle_Stick_Recognition(historical_data[-3:])
+        candle_stick_recognition = TA_Candle_Stick_Recognition(historical_data[-5:])
 
         candle_stick_recognition.detect_patterns()
 
@@ -314,15 +314,79 @@ async def analyze_all_gainers_order_book(top_gainers):
 
         check_harami = detect_harami_and_cross(historical_data)
 
-        print(f"latest candle stick {symbol} is: ", str(latest_candlestick))
-        print(f"trend of {symbol} is: ", context)
-        print(f"avg price of {symbol} is: ", average_close)
-        print(f"latest candle stick {symbol} is: ", check_hammer_or_hangingman)
-        print(f"The latest pattern for {symbol} detected is {engulfing_pattern}.")
-        print(f"check dark cloud cover for {symbol} detected is {check_dark_cloud}.")
-        print(f"check_piercing_pattern for {symbol} detected is {check_piercing_pattern}.")
-        print(f"check_stars_pattern for {symbol} detected is {check_stars_pattern}.")
-        print(f"check_harami_pattern for {symbol} detected is {check_harami}.")
+        tweezers_top = check_tweezers_top(historical_data)
+
+        tweezers_bottom = check_tweezers_bottom(historical_data)
+
+        belt_hold = check_belt_hold(historical_data)
+
+        upside_gap_two_crows = check_upside_gap_two_crows(historical_data)
+
+        three_black_crows = check_three_black_crows(historical_data)
+
+        three_advancing_white_soldiers = check_three_advancing_white_soldiers(historical_data)
+
+        buddha_top_bottom = check_buddha_top_bottom(historical_data, top=True)
+
+        counterattack_lines = check_counterattack_lines(historical_data)
+
+        dumpling_top = check_dumpling_top(historical_data)
+
+        frypan_bottom = check_frypan_bottom(historical_data)
+
+        tower_top = check_tower_top(historical_data)
+
+        tower_bottom = check_tower_bottom(historical_data)
+
+        window_gaps = detect_window_gaps(historical_data)
+
+        tasuki_patterns = detect_tasuki_patterns(historical_data)
+
+        gapping_plays = detect_gapping_plays(historical_data)
+
+        gapping_side_by_side_white_lines = detect_gapping_side_by_side_white_lines(historical_data)
+
+        rising_falling_three_methods = detect_rising_falling_three_methods(historical_data)
+
+        separating_lines = detect_separating_lines(historical_data)
+
+        doji_types = detect_doji_types(historical_data)
+
+        pattern_results = {
+        "Symbol": symbol,
+        "Latest Candle": str(latest_candlestick),
+        "Trend": context,
+        "Average Close Price": average_close,
+        "Manual Patterns": {
+            "Hammer or Hangingman": check_hammer_or_hangingman,
+            "Engulfing Pattern": engulfing_pattern,
+            "Dark Cloud Cover": check_dark_cloud,
+            "Piercing, On-Neck, In-Neck, Thrusting": check_piercing_pattern,
+            "Stars Pattern": check_stars_pattern,
+            "Harami and Cross": check_harami,
+            "Tweezers Top": tweezers_top,
+            "Tweezers Bottom": tweezers_bottom,
+            "Belt Hold": belt_hold,
+            "Upside-Gap Two Crows": upside_gap_two_crows,
+            "Three Black Crows": three_black_crows,
+            "Three Advancing White Soldiers": three_advancing_white_soldiers,
+            "Buddha Top/Bottom": buddha_top_bottom,
+            "Counterattack Lines": counterattack_lines,
+            "Dumpling Top": dumpling_top,
+            "Frypan Bottom": frypan_bottom,
+            "Tower Top": tower_top,
+            "Tower Bottom": tower_bottom,
+            "Window Gaps": window_gaps,
+            "Tasuki Patterns": tasuki_patterns,
+            "Gapping Plays": gapping_plays,
+            "Gapping Side-by-Side White Lines": gapping_side_by_side_white_lines,
+            "Rising and Falling Three Methods": rising_falling_three_methods,
+            "Separating Lines": separating_lines,
+            "Doji Types": doji_types
+            } 
+        }
+
+        print(pattern_results)
 
         # Estimate price movement
 

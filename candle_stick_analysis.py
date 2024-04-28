@@ -641,6 +641,239 @@ def check_tower_bottom(historical_data):
         return "Tower Bottom detected"
     return "No Tower Bottom detected"
 
+def detect_window_gaps(historical_data):
+    """
+    Detects bullish or bearish gaps (windows) in the latest candlesticks and suggests trading actions.
+
+    :param historical_data: List of dictionaries containing candlestick data, including open, high, low, close prices.
+    :return: A description of the detected window and trading suggestion.
+    """
+    if len(historical_data) < 2:
+        return "Not enough data to detect windows."
+
+    # Get the last two candlesticks
+    previous_candle = historical_data[-2]
+    latest_candle = historical_data[-1]
+
+    # Detecting gaps
+    if latest_candle['low'] > previous_candle['high']:
+        return "Bullish window detected. The gap indicates strong buying pressure. Consider taking a long position if other indicators also support a bullish continuation."
+    elif latest_candle['high'] < previous_candle['low']:
+        return "Bearish window detected. The gap indicates strong selling pressure. Consider taking a short position if other indicators also support a bearish continuation."
+    else:
+        return "No window (gap) detected."
+
+def detect_tasuki_patterns(historical_data):
+    """
+    Detects Tasuki Gap Up and Tasuki Gap Down patterns in the historical candlestick data.
+
+    :param historical_data: List of dictionaries containing candlestick data, including open, high, low, close prices.
+    :return: A description of any detected Tasuki pattern.
+    """
+    if len(historical_data) < 3:
+        return "Insufficient data for pattern detection."
+
+    # Latest three candles
+    first_candle = historical_data[-3]
+    second_candle = historical_data[-2]
+    third_candle = historical_data[-1]
+
+    # Tasuki Gap Up Detection
+    if first_candle['close'] > first_candle['open'] and second_candle['close'] > second_candle['open'] and \
+       second_candle['open'] > first_candle['close'] and third_candle['open'] > second_candle['open'] and \
+       third_candle['close'] < second_candle['open'] and third_candle['close'] > first_candle['close'] and \
+       third_candle['open'] > third_candle['close']:
+        return "Tasuki Gap Up (Bullish) detected"
+
+    # Tasuki Gap Down Detection
+    if first_candle['close'] < first_candle['open'] and second_candle['close'] < second_candle['open'] and \
+       second_candle['open'] < first_candle['close'] and third_candle['open'] < second_candle['open'] and \
+       third_candle['close'] > second_candle['open'] and third_candle['close'] < first_candle['close'] and \
+       third_candle['open'] < third_candle['close']:
+        return "Tasuki Gap Down (Bearish) detected"
+
+    return "No Tasuki pattern detected."
+
+def detect_gapping_plays(historical_data):
+    """
+    Detects both High-Price and Low-Price Gapping Plays in the latest candles.
+
+    :param historical_data: List of dictionaries containing candlestick data, including open, high, low, close prices.
+    :return: A description of the detected gapping play.
+    """
+    if len(historical_data) < 2:
+        return "Insufficient data for pattern detection."
+
+    # Get the last two candlesticks
+    previous_candle = historical_data[-2]
+    current_candle = historical_data[-1]
+
+    # Criteria for High-Price Gapping Play
+    if current_candle['low'] > previous_candle['high'] and \
+       current_candle['close'] > current_candle['open'] and \
+       current_candle['close'] > previous_candle['close']:
+        return "High-Price Gapping Play detected (Bullish Continuation)"
+
+    # Criteria for Low-Price Gapping Play
+    elif current_candle['high'] < previous_candle['low'] and \
+         current_candle['close'] < current_candle['open'] and \
+         current_candle['close'] < previous_candle['close']:
+        return "Low-Price Gapping Play detected (Bearish Continuation)"
+
+    return "No Gapping Play detected"
+
+def detect_gapping_side_by_side_white_lines(historical_data):
+    """
+    Detects Up Gapping Side-by-Side White Lines and Down Gapping Side-by-Side Black Lines.
+
+    :param historical_data: List of dictionaries containing candlestick data, including open, high, low, close prices.
+    :return: A description of the detected gapping side-by-side line pattern.
+    """
+    if len(historical_data) < 3:
+        return "Insufficient data for pattern detection."
+
+    # Get the last three candlesticks
+    first_candle = historical_data[-3]
+    second_candle = historical_data[-2]
+    third_candle = historical_data[-1]
+
+    # Criteria for Up Gapping Side-by-Side White Lines
+    if first_candle['close'] > first_candle['open'] and \
+       second_candle['open'] > first_candle['close'] and \
+       second_candle['close'] > second_candle['open'] and \
+       third_candle['open'] > second_candle['close'] and \
+       third_candle['close'] > third_candle['open']:
+        return "Up Gapping Side-by-Side White Lines detected (Bullish Continuation)"
+
+    # Criteria for Down Gapping Side-by-Side Black Lines
+    if first_candle['close'] < first_candle['open'] and \
+       second_candle['open'] < first_candle['close'] and \
+       second_candle['close'] < second_candle['open'] and \
+       third_candle['open'] < second_candle['close'] and \
+       third_candle['close'] < third_candle['open']:
+        return "Down Gapping Side-by-Side Black Lines detected (Bearish Continuation)"
+
+    return "No Gapping Side-by-Side Line pattern detected"
+
+def detect_rising_falling_three_methods(historical_data):
+    """
+    Detects Rising Three Methods and Falling Three Methods patterns.
+
+    :param historical_data: List of dictionaries containing candlestick data, including open, high, low, close prices.
+    :return: A description of the detected Three Methods pattern.
+    """
+    if len(historical_data) < 5:
+        return "Insufficient data for pattern detection."
+
+    # Get the last five candlesticks
+    first_candle = historical_data[-5]
+    second_candle = historical_data[-4]
+    third_candle = historical_data[-3]
+    fourth_candle = historical_data[-2]
+    fifth_candle = historical_data[-1]
+
+    # Criteria for Rising Three Methods
+    if first_candle['close'] > first_candle['open'] and \
+       fifth_candle['close'] > fifth_candle['open'] and \
+       fifth_candle['close'] > first_candle['close'] and \
+       second_candle['open'] > first_candle['close'] and \
+       second_candle['close'] < third_candle['open'] and \
+       third_candle['close'] < fourth_candle['open'] and \
+       fourth_candle['close'] < fifth_candle['open'] and \
+       all(c['close'] < c['open'] for c in [second_candle, third_candle, fourth_candle]):
+        return "Rising Three Methods detected (Bullish Continuation)"
+
+    # Criteria for Falling Three Methods
+    if first_candle['close'] < first_candle['open'] and \
+       fifth_candle['close'] < fifth_candle['open'] and \
+       fifth_candle['close'] < first_candle['close'] and \
+       second_candle['open'] < first_candle['close'] and \
+       second_candle['close'] > third_candle['open'] and \
+       third_candle['close'] > fourth_candle['open'] and \
+       fourth_candle['close'] > fifth_candle['open'] and \
+       all(c['close'] > c['open'] for c in [second_candle, third_candle, fourth_candle]):
+        return "Falling Three Methods detected (Bearish Continuation)"
+
+    return "No Three Methods pattern detected"
+
+def detect_separating_lines(historical_data):
+    """
+    Detects Bullish and Bearish Separating Line patterns.
+
+    :param historical_data: List of dictionaries containing candlestick data, including open, high, low, close prices.
+    :return: A description of the detected Separating Line pattern.
+    """
+    if len(historical_data) < 2:
+        return "Insufficient data for pattern detection."
+
+    # Get the last two candlesticks
+    previous_candle = historical_data[-2]
+    latest_candle = historical_data[-1]
+
+    # Criteria for Bullish Separating Line
+    if previous_candle['open'] == latest_candle['open'] and \
+       previous_candle['close'] < previous_candle['open'] and \
+       latest_candle['close'] > latest_candle['open']:
+        return "Bullish Separating Line detected (Bullish Continuation)"
+
+    # Criteria for Bearish Separating Line
+    elif previous_candle['open'] == latest_candle['open'] and \
+         previous_candle['close'] > previous_candle['open'] and \
+         latest_candle['close'] < latest_candle['open']:
+        return "Bearish Separating Line detected (Bearish Continuation)"
+
+    return "No Separating Line pattern detected"
+
+def detect_doji_types(historical_data):
+    """
+    Detects different types of Doji candlesticks and their potential implications.
+
+    :param historical_data: List of dictionaries containing candlestick data, including open, high, low, close prices.
+    :return: Dictionary containing the type of Doji and its potential implication (bullish or bearish).
+    """
+    if not historical_data:
+        return "No data available"
+
+    last_candle = historical_data[-1]
+    open_price = last_candle['open']
+    close_price = last_candle['close']
+    high_price = last_candle['high']
+    low_price = last_candle['low']
+
+    # Define what is considered a small body, here using a small percentage of the high-low range
+    body_size = abs(close_price - open_price)
+    range_size = high_price - low_price
+    small_body = range_size * 0.1  # Small body is less than 10% of the range
+    long_shadow = range_size * 0.4  # Shadows must be at least 40% of the total range
+
+    results = {}
+
+    if body_size <= small_body:  # Body size is very small
+        upper_shadow = high_price - max(open_price, close_price)
+        lower_shadow = min(open_price, close_price) - low_price
+
+        if upper_shadow > long_shadow and lower_shadow > long_shadow:
+            results['type'] = 'Long-Legged Doji'
+            results['implication'] = 'Extreme indecision'
+        elif close_price == open_price:
+            if close_price == high_price and close_price == low_price:
+                results['type'] = 'Four Price Doji'
+                results['implication'] = 'Indecision'
+            elif close_price == low_price:
+                results['type'] = 'Dragonfly Doji'
+                results['implication'] = 'Potential bullish reversal'
+            elif close_price == high_price:
+                results['type'] = 'Gravestone Doji'
+                results['implication'] = 'Potential bearish reversal'
+            else:
+                results['type'] = 'Standard Doji'
+                results['implication'] = 'Indecision'
+        else:
+            results['type'] = 'Near Doji'
+            results['implication'] = 'Indecision'
+
+    return results
+
 # historical_data = fetch_historical_data("TRUUSDT", "15m", 100)
 # print(historical_data)
 # engulfing_pattern = check_for_engulfing_pattern(historical_data)

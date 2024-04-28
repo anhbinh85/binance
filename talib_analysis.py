@@ -48,7 +48,14 @@ class TA_Candle_Stick_Recognition:
             "Upside_Gap_Two_Crows":talib.CDLUPSIDEGAP2CROWS(self.opens, self.highs, self.lows, self.closes),
             "Three_Black_Crows":talib.CDL3BLACKCROWS(self.opens, self.highs, self.lows, self.closes),
             "Three_Advancing_White_Soldiers":talib.CDL3WHITESOLDIERS(self.opens, self.highs, self.lows, self.closes),
-            "Counterattack":talib.CDLCOUNTERATTACK(self.opens, self.highs, self.lows, self.closes)
+            "Counterattack":talib.CDLCOUNTERATTACK(self.opens, self.highs, self.lows, self.closes),
+            "Tasuki":talib.CDLTASUKIGAP(self.opens, self.highs, self.lows, self.closes),
+            "Up/Down-gap_side-by-side_white_lines":talib.CDLGAPSIDESIDEWHITE(self.opens, self.highs, self.lows, self.closes),
+            "Rising/Falling_Three_Methods":talib.CDLRISEFALL3METHODS(self.opens, self.highs, self.lows, self.closes),
+            "Separating_Lines":talib.CDLRISEFALL3METHODS(self.opens, self.highs, self.lows, self.closes),
+            "Dragonfly_Doji":talib.CDLDRAGONFLYDOJI(self.opens, self.highs, self.lows, self.closes),
+            "Gravestone_Doji":talib.CDLGRAVESTONEDOJI(self.opens, self.highs, self.lows, self.closes),
+            "Long_Legged_Doji":talib.CDLLONGLEGGEDDOJI(self.opens, self.highs, self.lows, self.closes)
         }
 
         # Check each pattern in the latest candle and print result

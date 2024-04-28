@@ -1,15 +1,15 @@
-File created on: 2024-04-13 16:52:08
-Total unique symbols: 408
+File created on: 2024-04-29 00:16:06
+Total unique symbols: 409
 
-Symbol: GALUSDT, Start Price: 4.508, Start Time: 2024-04-13 09:37:06.962000, End Price: 4.554, End Time: 2024-04-13 09:52:06.021000, Price Change (%): 1.020408163265312
-Symbol: SANTOSUSDT, Start Price: 5.695, Start Time: 2024-04-13 09:37:12.547000, End Price: 5.724, End Time: 2024-04-13 09:52:06.154000, Price Change (%): 0.5092186128182601
-Symbol: REQUSDT, Start Price: 0.1362, Start Time: 2024-04-13 09:37:09.759000, End Price: 0.1366, End Time: 2024-04-13 09:52:06.755000, Price Change (%): 0.29368575624083076
-Symbol: PHAUSDT, Start Price: 0.2208, Start Time: 2024-04-13 09:37:07.415000, End Price: 0.2213, End Time: 2024-04-13 09:52:05.321000, Price Change (%): 0.22644927536231907
-Symbol: XVGUSDT, Start Price: 0.007467, Start Time: 2024-04-13 09:37:07.160000, End Price: 0.007449, End Time: 2024-04-13 09:52:05.798000, Price Change (%): -0.24106066693450903
-Symbol: FISUSDT, Start Price: 0.6343, Start Time: 2024-04-13 09:37:12.637000, End Price: 0.6314, End Time: 2024-04-13 09:52:05.646000, Price Change (%): -0.4571969099795071
-Symbol: VETUSDT, Start Price: 0.04542, Start Time: 2024-04-13 09:37:07.645000, End Price: 0.045, End Time: 2024-04-13 09:52:06.468000, Price Change (%): -0.9247027741083303
-Symbol: PERPUSDT, Start Price: 1.20928, Start Time: 2024-04-13 09:37:07.252000, End Price: 1.19666, End Time: 2024-04-13 09:52:06.193000, Price Change (%): -1.0435961894681012
-Symbol: VANRYUSDT, Start Price: 0.17067, Start Time: 2024-04-13 09:37:06.929000, End Price: 0.16757, End Time: 2024-04-13 09:52:05.891000, Price Change (%): -1.8163707740083153
-Symbol: TIAUSDT, Start Price: 9.92, Start Time: 2024-04-13 09:37:07.275000, End Price: 9.67, End Time: 2024-04-13 09:52:06.036000, Price Change (%): -2.520161290322581
-latest top gainers in database: {'_id': ObjectId('661a55c7f286fe0e97685d8b'), 'startPrice': 4.508, 'endPrice': 4.554, 'startTime': '2024-04-13 09:37:06.962000', 'endTime': '2024-04-13 09:52:06.021000', 'symbol': 'GALUSDT', 'priceChangePercent': 1.020408163265312, 'recordedAt': datetime.datetime(2024, 4, 13, 9, 52, 7, 683000)}
+Symbol: JUPUSDT, Start Price: 1.0296, Start Time: 2024-04-28 17:01:06.039000, End Price: 1.0328, End Time: 2024-04-28 17:16:04.836000, Price Change (%): 0.31080031080029813
+Symbol: WUSDT, Start Price: 0.644, Start Time: 2024-04-28 17:01:06.484000, End Price: 0.646, End Time: 2024-04-28 17:16:04.387000, Price Change (%): 0.31055900621118043
+Symbol: PORTALUSDT, Start Price: 0.92, Start Time: 2024-04-28 17:01:05.688000, End Price: 0.9226, End Time: 2024-04-28 17:16:03.296000, Price Change (%): 0.2826086956521669
+Symbol: PDAUSDT, Start Price: 0.0832, Start Time: 2024-04-28 17:01:12.988000, End Price: 0.0834, End Time: 2024-04-28 17:15:35.912000, Price Change (%): 0.2403846153846223
+Symbol: PIXELUSDT, Start Price: 0.4398, Start Time: 2024-04-28 17:01:05.560000, End Price: 0.4408, End Time: 2024-04-28 17:16:01.709000, Price Change (%): 0.22737608003638035
+Symbol: OAXUSDT, Start Price: 0.2309, Start Time: 2024-04-28 17:01:05.544000, End Price: 0.2313, End Time: 2024-04-28 17:05:24.743000, Price Change (%): 0.17323516673885295
+Symbol: ENAUSDT, Start Price: 0.865, Start Time: 2024-04-28 17:01:05.559000, End Price: 0.866, End Time: 2024-04-28 17:16:04.396000, Price Change (%): 0.11560693641618507
+Symbol: WIFUSDT, Start Price: 2.764, Start Time: 2024-04-28 17:01:06.143000, End Price: 2.7588, End Time: 2024-04-28 17:16:04.019000, Price Change (%): -0.18813314037626164
+Symbol: TNSRUSDT, Start Price: 0.9646, Start Time: 2024-04-28 17:05:36.177000, End Price: 0.9621, End Time: 2024-04-28 17:16:03.422000, Price Change (%): -0.25917478747668027
+Symbol: ENSUSDT, Start Price: 16.87, Start Time: 2024-04-28 17:01:06.156000, End Price: 16.77, End Time: 2024-04-28 17:16:04.327000, Price Change (%): -0.5927682276230078
+latest top gainers in database: {'_id': ObjectId('662e8456be563e5fd6e7b62b'), 'startPrice': 1.0296, 'endPrice': 1.0328, 'startTime': '2024-04-28 17:01:06.039000', 'endTime': '2024-04-28 17:16:04.836000', 'symbol': 'JUPUSDT', 'priceChangePercent': 0.31080031080029813, 'recordedAt': datetime.datetime(2024, 4, 28, 17, 16, 6, 435000)}
 
