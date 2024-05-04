@@ -5,6 +5,7 @@ import os
 import pymongo
 import requests
 import time
+import pprint
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -15,6 +16,8 @@ from orderbook_analysis import fetch_order_book, analyze_order_book
 from trading_execution import client as client_binance, execute_order_based_on_signal_and_balance, close_positions_based_on_profit_loss
 from talib_analysis import TA_Candle_Stick_Recognition
 from candle_stick_analysis import *
+from candle_stick_with_trend_line import Candle_Stick_Combine_Trend_Line
+from candle_stick_with_technical_indicators import TechnicalIndicators
 
 # Load environment variables from .env file
 load_dotenv()
@@ -292,8 +295,18 @@ async def analyze_all_gainers_order_book(top_gainers):
 
         print(f"Pattern Recognition from TA-LIB....for {symbol}")
         candle_stick_recognition = TA_Candle_Stick_Recognition(historical_data[-5:])
-
         candle_stick_recognition.detect_patterns()
+
+        # Technical Indicatiors Analysis
+        print("Technical Indicatiors Analysis ...")
+        ti = TechnicalIndicators(historical_data)
+        technical_analysis = ti.execute()
+
+
+        # Candle_stick_with_trend_line:
+        print("Candle stick with trend line ... using TA-LIB")
+        candle_with_trend = Candle_Stick_Combine_Trend_Line(historical_data)
+        ta_lib_data = candle_with_trend.execute()
 
 
         # Fetch the latest candle stick 15m:
@@ -352,7 +365,7 @@ async def analyze_all_gainers_order_book(top_gainers):
 
         doji_types = detect_doji_types(historical_data)
 
-        pattern_results = {
+        manual_analysis = {
         "Symbol": symbol,
         "Latest Candle": str(latest_candlestick),
         "Trend": context,
@@ -386,7 +399,13 @@ async def analyze_all_gainers_order_book(top_gainers):
             } 
         }
 
-        print(pattern_results)
+        master_data = {
+            "manual_analysis": manual_analysis,
+            "ta_lib_data": ta_lib_data,
+            "technical_analysis":technical_analysis
+        }
+
+        # print(master_results)
 
         # Estimate price movement
 
@@ -400,16 +419,12 @@ async def analyze_all_gainers_order_book(top_gainers):
             "price_increase_percentage": gainer['priceChangePercent'],
             "orderbook": order_book_trend,
             "price_movement": price_movement,
-            "trading_signal": trading_signal
+            "trading_signal": trading_signal,
+            "master_data" :master_data
         }
         results.append(result)
 
-    for res in results:
-        print(res)
-
     return results
-
-
 
 async def main():
     print("Starting main function...")
