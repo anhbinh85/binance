@@ -5,19 +5,19 @@ import os
 import pymongo
 import requests
 import time
-import pprint
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from aiogram import Bot
 from telegram import send_telegram_message, format_message
-from trading_logic import trading_decision_based_on_conditions
+from trading_logic import trading_decision_based_on_conditions, generate_trading_decision
 from orderbook_analysis import fetch_order_book, analyze_order_book
 from trading_execution import client as client_binance, execute_order_based_on_signal_and_balance, close_positions_based_on_profit_loss
 from talib_analysis import TA_Candle_Stick_Recognition
 from candle_stick_analysis import *
 from candle_stick_with_trend_line import Candle_Stick_Combine_Trend_Line
 from candle_stick_with_technical_indicators import TechnicalIndicators
+from volume_analysis import calculate_obv
 
 # Load environment variables from .env file
 load_dotenv()
@@ -41,9 +41,13 @@ def test_mongodb_connection():
         # Attempt to fetch a small amount of data
         # Connect to MongoDB
         client = MongoClient(database_url)
+        print("Client:", client)
         db = client["binance"]  # Database name
+        print("db:", db)
         collection = db["binance_gainers_15m"]  # Collection name
+        print("collection:", collection)
         one_doc = collection.find_one()
+        print("one_doc:",one_doc)
         print("Successfully connected to MongoDB. Document found:", one_doc)
     except Exception as e:
         print("Failed to connect to MongoDB:", e)
@@ -291,11 +295,20 @@ async def analyze_all_gainers_order_book(top_gainers):
         # Fetch Historical data
         historical_data = fetch_historical_data(symbol, interval, limit)
 
+        #Add OBV into historical_data:
+        # historical_data_added_OBV = calculate_obv(historical_data)
+        # obv_data = {symbol:historical_data_added_OBV["OBV"]}
+        # print("**********OBV*****************")
+        # print(obv_data)
+        # Calculate OBV
+        obv_values = calculate_obv(historical_data)
+        # print("Obv Values: ", obv_values)
+
         # Ta_lib:
 
-        print(f"Pattern Recognition from TA-LIB....for {symbol}")
-        candle_stick_recognition = TA_Candle_Stick_Recognition(historical_data[-5:])
-        candle_stick_recognition.detect_patterns()
+        # print(f"Pattern Recognition from TA-LIB....for {symbol}")
+        # candle_stick_recognition = TA_Candle_Stick_Recognition(historical_data[-5:])
+        # candle_stick_recognition.detect_patterns()
 
         # Technical Indicatiors Analysis
         print("Technical Indicatiors Analysis ...")
@@ -305,12 +318,15 @@ async def analyze_all_gainers_order_book(top_gainers):
 
         # Candle_stick_with_trend_line:
         print("Candle stick with trend line ... using TA-LIB")
+        print(f"Pattern Recognition from TA-LIB....for {symbol}")
         candle_with_trend = Candle_Stick_Combine_Trend_Line(historical_data)
         ta_lib_data = candle_with_trend.execute()
 
+        print("Candle stick pattern by TA: ", ta_lib_data)
+
 
         # Fetch the latest candle stick 15m:
-        print("Pattern Recognition from manual analysis...")
+        # print("Pattern Recognition from manual analysis...")
         latest_candlestick = historical_data[-1]
 
         context, average_close = determine_trend(symbol, interval, limit)
@@ -405,13 +421,15 @@ async def analyze_all_gainers_order_book(top_gainers):
             "technical_analysis":technical_analysis
         }
 
-        # print(master_results)
+        # print("Manual Candle stick patterns: ", master_data["manual_analysis"])
 
         # Estimate price movement
 
         price_movement = estimate_price_movement(symbol, interval, order_book, limit)
 
         trading_signal = trading_decision_based_on_conditions(price_movement, order_book_trend[0])
+
+        print("Trading Signal: ", trading_signal)
 
         # Generate the result dictionary for each symbol
         result = {
@@ -420,8 +438,17 @@ async def analyze_all_gainers_order_book(top_gainers):
             "orderbook": order_book_trend,
             "price_movement": price_movement,
             "trading_signal": trading_signal,
-            "master_data" :master_data
+            "ta_lib_data" : master_data["ta_lib_data"],
+            "technical_analysis": master_data["technical_analysis"],
+            "obv_values":obv_values
         }
+
+        trading_decision = generate_trading_decision(result) 
+
+        result["trading_decision"] = trading_decision
+
+        print("Trading Decision: ", result["trading_decision"])
+
         results.append(result)
 
     return results
@@ -464,12 +491,12 @@ async def main():
 
             # Analyze the top gainer and its order book
             
-            top_gainer_analysis = await analyze_all_gainers_order_book(top_gainers)
-            print("top_gainer_analysis: ", top_gainer_analysis)
+            results = await analyze_all_gainers_order_book(top_gainers)
+            # print("top_gainer_analysis: ", top_gainer_analysis)
         
             # Format and send the analysis to Telegram
             
-            formatted_message = format_message(top_gainer_analysis)
+            formatted_message = format_message(results)
             
             try:
                 await send_telegram_message(bot, telegram_chat_id, formatted_message)
@@ -480,15 +507,16 @@ async def main():
             # Execute trading decisions based on the analysis and trading signal
             # Make sure to check your account balance and trading conditions before executing
             #################
-            # for signal in top_gainer_analysis:
-                # print("signal: ", signal['trading_signal'])
-                # trade_response = execute_order_based_on_signal_and_balance(signal['trading_signal'], client_binance)
-                # print(f"Trade execution response: {trade_response}")
+            for result in results:
+                print("signal for symbol: ", result['trading_signal']['Symbol'])
+                trading_decision = result["trading_decision"]
+                trade_response = execute_order_based_on_signal_and_balance(result['trading_signal'], client_binance, trading_decision)
+                print(f"Trade execution response: {trade_response}")
 
             # This function checks all your open positions and decides whether to close them
-            # print("Start to check and close position...")
-            # close_positions_response = close_positions_based_on_profit_loss(client_binance)
-            # print(f"Close positions response: {close_positions_response}")
+            print("Start to check and close position...")
+            close_positions_response = close_positions_based_on_profit_loss(client_binance)
+            print(f"Close positions response: {close_positions_response}")
             ##################
 
             if top_gainer_symbols:
@@ -511,3 +539,5 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 
+
+# test_mongodb_connection()

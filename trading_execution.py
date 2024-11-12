@@ -103,49 +103,72 @@ def has_open_positions(symbol, client):
     return False
 
 
-def execute_order_based_on_signal_and_balance(trading_signal, client):
-    
+def execute_order_based_on_signal_and_balance(trading_signal, client,
+                                             trading_decision):
+
     symbol = trading_signal['Symbol']
-    # print("Symbol in execute order: ", symbol)
 
     # Fetch futures symbols list
     futures_symbols = fetch_futures_symbols()
-    # print("Futures_symbols: ", futures_symbols)
 
-     # Check for existing positions
+    # Check for existing positions
     if has_open_positions(symbol, client):
-        return {'error': f'Existing open position for {symbol}, cannot place new order.'}
+        return {
+            'error':
+            f'Existing open position for {symbol}, cannot place new order.'
+        }
 
     if symbol in futures_symbols:
 
         try:
             # Attempt to set leverage, but do not stop the process if it fails
-
             leverage_response = set_leverage(symbol)
 
             if not leverage_response['success']:
                 # Log the failure but do not return an error to allow the order process to continue
-                print(f"Proceeding without setting leverage for {symbol}. Reason: {leverage_response.get('error', 'Unknown error')}")
-        
+                print(
+                    f"Proceeding without setting leverage for {symbol}. Reason: {leverage_response.get('error', 'Unknown error')}"
+                )
+
             # Continue with order execution
             balances = check_futures_account_balance()
-            trade_decision = can_trade_based_on_balance(trading_signal, balances)
+            trade_decision = can_trade_based_on_balance(
+                trading_signal, balances)
             if not trade_decision['can_trade']:
                 return {'error': 'Insufficient balance for trading.'}
-            
+
             market_price = get_market_price(symbol)
             usd_amount = 6  # Define the USD amount to trade
-            initial_quantity = calculate_quantity_for_usd_amount(usd_amount, market_price)
+            initial_quantity = calculate_quantity_for_usd_amount(
+                usd_amount, market_price)
             # Ensure to adjust the quantity precision based on the symbol's requirements
-            adjusted_quantity = adjust_quantity_precision(symbol, initial_quantity, client)
+            adjusted_quantity = adjust_quantity_precision(
+                symbol, initial_quantity, client)
             print("adjust_quantity_precision: ", adjusted_quantity)
-            # Place the order based on the trading signal, without relying on leverage being set
-            if trading_signal['Long Position'] == 1:
-                order_response = client.futures_create_order(symbol=symbol, side='BUY', type='MARKET', quantity=adjusted_quantity)
-            elif trading_signal['Short Position'] == 1:
-                order_response = client.futures_create_order(symbol=symbol, side='SELL', type='MARKET', quantity=adjusted_quantity)
+
+            # Place the order based on the trading_signal and trading_decision
+            if trading_signal[
+                    'Long Position'] == 1 and trading_decision in (
+                        "Strong Long", "Long", "Weak Long"):
+                order_response = client.futures_create_order(
+                    symbol=symbol,
+                    side='BUY',
+                    type='MARKET',
+                    quantity=adjusted_quantity)
+            elif trading_signal[
+                    'Short Position'] == 1 and trading_decision in (
+                        "Strong Short", "Short", "Weak Short"):
+                order_response = client.futures_create_order(
+                    symbol=symbol,
+                    side='SELL',
+                    type='MARKET',
+                    quantity=adjusted_quantity)
             else:
-                return {'error': 'Invalid trading signal provided.'}
+                return {
+                    'error':
+                    'No trade signal generated or trading decision does not match.'
+                }
+
             return order_response
 
         except Exception as e:
@@ -224,7 +247,7 @@ def close_positions_based_on_profit_loss(client, profit_threshold=0.02, loss_thr
 
 
         # Check if overall profit exceeds the threshold or if there are losses but total profit is positive
-        if overall_pnl_percentage >= 0.01:
+        if overall_pnl_percentage >= 0.05:
             for position in positions:
                 positionAmt = float(position.get('positionAmt', 0))
                 if positionAmt != 0:

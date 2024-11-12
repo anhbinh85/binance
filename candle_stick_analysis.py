@@ -11,6 +11,7 @@ def fetch_historical_data(symbol, interval, limit):
 
     :param symbol: String, the symbol to fetch data for (e.g., 'BTCUSDT').
     :param interval: String, the time interval (e.g., '15m' for 15 minutes).
+    :param limit: Integer, maximum number of data points to retrieve (default is 500).
     :return: List of dictionaries with historical data or None if an error occurs.
     """
     base_url = "https://api.binance.com"
@@ -18,12 +19,12 @@ def fetch_historical_data(symbol, interval, limit):
     params = {
         'symbol': symbol,
         'interval': interval,
-        'limit': limit  # Maximum number of data points (adjust as needed)
+        'limit': limit
     }
 
     try:
         response = requests.get(base_url + endpoint, params=params)
-        response.raise_for_status()
+        response.raise_for_status()  # Raises an HTTPError for bad requests
         data = response.json()
 
         # Convert data to a more usable format
@@ -36,7 +37,11 @@ def fetch_historical_data(symbol, interval, limit):
                 'low': float(kline[3]),
                 'close': float(kline[4]),
                 'volume': float(kline[5]),
-                'close_time': kline[6]
+                'close_time': kline[6],
+                'quote_asset_volume': float(kline[7]),
+                'number_of_trades': int(kline[8]),
+                'taker_buy_base_asset_volume': float(kline[9]),
+                'taker_buy_quote_asset_volume': float(kline[10])
             }
             historical_data.append(entry)
 
