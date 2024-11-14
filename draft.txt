@@ -378,3 +378,27 @@ def trading_decision_based_on_conditions(price_movement, order_book_trend):
 
     return decision
 
+results = [{
+            "symbol": symbol,
+            "price_increase_percentage": gainer['priceChangePercent'],
+            "orderbook": order_book_trend,
+            "price_movement": price_movement,
+            "trading_signal": trading_signal,
+            "ta_lib_data" : master_data["ta_lib_data"],
+            "technical_analysis": master_data["technical_analysis"],
+            "obv_values":obv_values,
+            "trading_decision":A
+        },
+        {
+            "symbol": symbol,
+            "price_increase_percentage": gainer['priceChangePercent'],
+            "orderbook": order_book_trend,
+            "price_movement": price_movement,
+            "trading_signal": trading_signal,
+            "ta_lib_data" : master_data["ta_lib_data"],
+            "technical_analysis": master_data["technical_analysis"],
+            "obv_values":obv_values,
+            "trading_decision":B
+        },
+        ]
+

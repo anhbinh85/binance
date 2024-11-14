@@ -1,5 +1,6 @@
 import os
 import math
+import time
 import requests
 from binance.client import Client
 from binance.exceptions import BinanceAPIException
@@ -149,18 +150,18 @@ def execute_order_based_on_signal_and_balance(trading_signal, client,
             # Place the order based on the trading_signal and trading_decision
             if trading_signal[
                     'Long Position'] == 1 and trading_decision in (
-                        "Strong Long", "Long", "Weak Long"):
+                        "Strong Long", "Long", "Weak Long", "Hold (Potential Long)"):
                 order_response = client.futures_create_order(
                     symbol=symbol,
-                    side='BUY',
+                    side='BUY',#CORRECT LOGIC IS BUY
                     type='MARKET',
                     quantity=adjusted_quantity)
             elif trading_signal[
                     'Short Position'] == 1 and trading_decision in (
-                        "Strong Short", "Short", "Weak Short"):
+                        "Strong Short", "Short", "Weak Short", "Hold (Potential Short)"):
                 order_response = client.futures_create_order(
                     symbol=symbol,
-                    side='SELL',
+                    side='SELL',#CORRECT LOGIC IS SELL
                     type='MARKET',
                     quantity=adjusted_quantity)
             else:
@@ -291,7 +292,6 @@ def close_positions_based_on_profit_loss(client, profit_threshold=0.02, loss_thr
         'closed_positions': closed_positions,
         'no_action_positions': no_action_positions
     }
-
 
 
 # def close_positions_based_on_profit_loss(client, profit_threshold=0.01):
