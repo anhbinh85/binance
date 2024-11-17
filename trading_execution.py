@@ -179,7 +179,7 @@ def execute_order_based_on_signal_and_balance(trading_signal, client,
         return {f'{symbol} is not supported for futures trading.'}
 
 
-def close_positions_based_on_profit_loss(client, profit_threshold=0.05, loss_threshold=-0.05):
+def close_positions_based_on_profit_loss(client, profit_threshold=0.0125, loss_threshold=-0.0125):
     closed_positions = []
     no_action_positions = []
 

@@ -19,7 +19,7 @@ client = Client(api_key, api_secret)
 while True:
     print("Checking to close position on profit/loss.......")
     try:
-        close_positions_based_on_profit_loss(client, profit_threshold=0.05, loss_threshold=-0.05)
+        close_positions_based_on_profit_loss(client, profit_threshold=0.0125, loss_threshold=-0.0125)#profit and loss threshold must devise for leverage level
     except BinanceAPIException as e:
         print(f"Binance API Exception occurred: {e}")
         # Handle the specific Binance API exception (e.g., log the error, retry with exponential backoff)
