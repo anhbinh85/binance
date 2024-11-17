@@ -116,7 +116,7 @@ async def binance_ws(symbols, collection):
         await asyncio.sleep(5)  # Wait for 5 seconds before attempting to reconnect
 
 
-def calculate_top_gainers(top_n=10):
+def calculate_top_gainers(top_n=20):
     print("Calculating top gainers...")
     # Define the time range for the 15-minute interval
     end_time = datetime.utcnow()
@@ -295,6 +295,12 @@ async def analyze_all_gainers_order_book(top_gainers):
         # Fetch Historical data
         historical_data = fetch_historical_data(symbol, interval, limit)
 
+        # Calculate price statistics
+        lookback_period = 48
+        average_price = np.mean([entry['close'] for entry in historical_data[-lookback_period:]])
+        min_price = min([entry['low'] for entry in historical_data[-lookback_period:]])
+        max_price = max([entry['high'] for entry in historical_data[-lookback_period:]])
+
         #Add OBV into historical_data:
         # historical_data_added_OBV = calculate_obv(historical_data)
         # obv_data = {symbol:historical_data_added_OBV["OBV"]}
@@ -440,7 +446,10 @@ async def analyze_all_gainers_order_book(top_gainers):
             "trading_signal": trading_signal,
             "ta_lib_data" : master_data["ta_lib_data"],
             "technical_analysis": master_data["technical_analysis"],
-            "obv_values":obv_values
+            "obv_values":obv_values,
+            "average_price":average_price,
+            "min_price":min_price,
+            "max_price":max_price
         }
 
         trading_decision = generate_trading_decision(result) 
@@ -483,7 +492,7 @@ async def main():
                 last_cleanup_time = current_time
 
             # Calculate top gainers
-            top_gainers = calculate_top_gainers(top_n=10)
+            top_gainers = calculate_top_gainers(top_n=20)
             record_top_gainers(top_gainers)
             write_top_gainers_to_file(top_gainers)
             top_gainer_symbols = [item['symbol'] for item in top_gainers]
@@ -514,9 +523,9 @@ async def main():
                 print(f"Trade execution response: {trade_response}")
 
             # This function checks all your open positions and decides whether to close them
-            print("Start to check and close position...")
-            close_positions_response = close_positions_based_on_profit_loss(client_binance)
-            print(f"Close positions response: {close_positions_response}")
+            # print("Start to check and close position...")
+            # close_positions_response = close_positions_based_on_profit_loss(client_binance)
+            # print(f"Close positions response: {close_positions_response}")
             ##################
 
             if top_gainer_symbols:

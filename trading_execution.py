@@ -15,7 +15,7 @@ api_secret = os.getenv('API_SECRET_KEY')
 # Initialize the Binance Client for Futures
 client = Client(api_key, api_secret)
 
-def set_leverage(symbol, leverage=2):
+def set_leverage(symbol, leverage=4):
 
     if not is_symbol_supported_for_futures(symbol):
         print(f"{symbol} is not supported for futures trading. Skipping leverage setting.")
@@ -179,7 +179,7 @@ def execute_order_based_on_signal_and_balance(trading_signal, client,
         return {f'{symbol} is not supported for futures trading.'}
 
 
-def close_positions_based_on_profit_loss(client, profit_threshold=0.02, loss_threshold=-0.02):
+def close_positions_based_on_profit_loss(client, profit_threshold=0.05, loss_threshold=-0.05):
     closed_positions = []
     no_action_positions = []
 

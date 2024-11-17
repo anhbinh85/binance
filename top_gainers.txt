@@ -1,15 +1,25 @@
-File created on: 2024-11-14 22:41:27
+File created on: 2024-11-17 15:09:37
 Total unique symbols: 404
 
-Symbol: WIFUSDT, Start Price: 3.804, Start Time: 2024-11-14 15:26:26.916000, End Price: 3.823, End Time: 2024-11-14 15:41:24.035000, Price Change (%): 0.49947423764458804
-Symbol: DODOUSDT, Start Price: 0.1161, Start Time: 2024-11-14 15:26:27.023000, End Price: 0.1166, End Time: 2024-11-14 15:41:24.617000, Price Change (%): 0.4306632213608962
-Symbol: QIUSDT, Start Price: 0.01351, Start Time: 2024-11-14 15:26:26.638000, End Price: 0.01355, End Time: 2024-11-14 15:41:24.559000, Price Change (%): 0.29607698001480465
-Symbol: MEMEUSDT, Start Price: 0.01338, Start Time: 2024-11-14 15:26:26.525000, End Price: 0.0134, End Time: 2024-11-14 15:41:24.943000, Price Change (%): 0.14947683109118776
-Symbol: BOMEUSDT, Start Price: 0.010148, Start Time: 2024-11-14 15:26:26.784000, End Price: 0.010162, End Time: 2024-11-14 15:41:24.892000, Price Change (%): 0.13795821836813546
-Symbol: BTTCUSDT, Start Price: 1.07e-06, Start Time: 2024-11-14 15:26:26.776000, End Price: 1.07e-06, End Time: 2024-11-14 15:41:24.740000, Price Change (%): 0.0
-Symbol: APEUSDT, Start Price: 1.086, Start Time: 2024-11-14 15:26:26.447000, End Price: 1.086, End Time: 2024-11-14 15:41:24.941000, Price Change (%): 0.0
-Symbol: TURBOUSDT, Start Price: 0.009162, Start Time: 2024-11-14 15:26:26.472000, End Price: 0.009152, End Time: 2024-11-14 15:41:24.572000, Price Change (%): -0.10914647456886697
-Symbol: RAREUSDT, Start Price: 0.1239, Start Time: 2024-11-14 15:36:25.870000, End Price: 0.1235, End Time: 2024-11-14 15:41:24.170000, Price Change (%): -0.32284100080710054
-Symbol: FLOKIUSDT, Start Price: 0.00021742, Start Time: 2024-11-14 15:26:26.553000, End Price: 0.00021655, End Time: 2024-11-14 15:36:02.738000, Price Change (%): -0.4001471805721568
-latest top gainers in database: {'_id': ObjectId('67361a2684a212ad13f9c63e'), 'startPrice': 3.804, 'endPrice': 3.823, 'startTime': '2024-11-14 15:26:26.916000', 'endTime': '2024-11-14 15:41:24.035000', 'symbol': 'WIFUSDT', 'priceChangePercent': 0.49947423764458804, 'recordedAt': datetime.datetime(2024, 11, 14, 15, 41, 26, 558000)}
+Symbol: CLVUSDT, Start Price: 0.11718, Start Time: 2024-11-17 07:57:30.379000, End Price: 0.12392, End Time: 2024-11-17 08:09:24.777000, Price Change (%): 5.7518347840928445
+Symbol: JTOUSDT, Start Price: 2.999, Start Time: 2024-11-17 08:04:33.322000, End Price: 3.042, End Time: 2024-11-17 08:09:25.312000, Price Change (%): 1.4338112704234647
+Symbol: SUIUSDT, Start Price: 3.7223, Start Time: 2024-11-17 07:54:35.429000, End Price: 3.7742, End Time: 2024-11-17 08:09:24.838000, Price Change (%): 1.3942992235983083
+Symbol: PNUTUSDT, Start Price: 1.635, Start Time: 2024-11-17 07:57:30.776000, End Price: 1.6509, End Time: 2024-11-17 08:09:25.003000, Price Change (%): 0.972477064220185
+Symbol: REIUSDT, Start Price: 0.05949, Start Time: 2024-11-17 07:54:35.058000, End Price: 0.06, End Time: 2024-11-17 08:09:24.553000, Price Change (%): 0.8572869389813356
+Symbol: ENAUSDT, Start Price: 0.5955, Start Time: 2024-11-17 08:04:33.337000, End Price: 0.6001, End Time: 2024-11-17 08:09:25.516000, Price Change (%): 0.7724601175482683
+Symbol: CYBERUSDT, Start Price: 3.66, Start Time: 2024-11-17 08:04:33.236000, End Price: 3.686, End Time: 2024-11-17 08:09:24.690000, Price Change (%): 0.7103825136611968
+Symbol: CETUSUSDT, Start Price: 0.3602, Start Time: 2024-11-17 07:54:37.684000, End Price: 0.3627, End Time: 2024-11-17 08:09:25.405000, Price Change (%): 0.6940588561910056
+Symbol: ZROUSDT, Start Price: 3.722, Start Time: 2024-11-17 07:57:31.594000, End Price: 3.747, End Time: 2024-11-17 08:09:24.393000, Price Change (%): 0.6716818914562039
+Symbol: PYTHUSDT, Start Price: 0.4353, Start Time: 2024-11-17 07:54:37.087000, End Price: 0.4378, End Time: 2024-11-17 08:09:25.118000, Price Change (%): 0.5743165632896858
+Symbol: ATAUSDT, Start Price: 0.1004, Start Time: 2024-11-17 08:04:41.610000, End Price: 0.1008, End Time: 2024-11-17 08:09:22.037000, Price Change (%): 0.39840637450198957
+Symbol: TRUUSDT, Start Price: 0.0949, Start Time: 2024-11-17 07:54:35.309000, End Price: 0.0952, End Time: 2024-11-17 08:09:24.607000, Price Change (%): 0.3161222339304622
+Symbol: NEIROUSDT, Start Price: 0.00212475, Start Time: 2024-11-17 07:54:35.271000, End Price: 0.00213045, End Time: 2024-11-17 08:09:25.724000, Price Change (%): 0.26826685492410757
+Symbol: INJUSDT, Start Price: 26.93, Start Time: 2024-11-17 07:54:35.317000, End Price: 26.98, End Time: 2024-11-17 08:09:25.592000, Price Change (%): 0.18566654288897405
+Symbol: FTMUSDT, Start Price: 0.7595, Start Time: 2024-11-17 07:54:35.111000, End Price: 0.7607, End Time: 2024-11-17 08:09:25.502000, Price Change (%): 0.1579986833443173
+Symbol: BARUSDT, Start Price: 2.095, Start Time: 2024-11-17 07:55:01.087000, End Price: 2.097, End Time: 2024-11-17 08:09:23.561000, Price Change (%): 0.09546539379473888
+Symbol: VTHOUSDT, Start Price: 0.001944, Start Time: 2024-11-17 08:04:44.673000, End Price: 0.001944, End Time: 2024-11-17 08:09:23.842000, Price Change (%): 0.0
+Symbol: ADAUSDT, Start Price: 0.7207, Start Time: 2024-11-17 07:54:35.209000, End Price: 0.7206, End Time: 2024-11-17 08:09:24.905000, Price Change (%): -0.013875398917717356
+Symbol: FLOKIUSDT, Start Price: 0.00027046, Start Time: 2024-11-17 07:54:35.149000, End Price: 0.00027028, End Time: 2024-11-17 08:09:25.255000, Price Change (%): -0.06655327959770799
+Symbol: HARDUSDT, Start Price: 0.1886, Start Time: 2024-11-17 07:57:31.594000, End Price: 0.1884, End Time: 2024-11-17 08:02:38.889000, Price Change (%): -0.10604453870624495
+latest top gainers in database: {'_id': ObjectId('6739a4bf20e8e990d5f7bbca'), 'startPrice': 0.11718, 'endPrice': 0.12392, 'startTime': '2024-11-17 07:57:30.379000', 'endTime': '2024-11-17 08:09:24.777000', 'symbol': 'CLVUSDT', 'priceChangePercent': 5.7518347840928445, 'recordedAt': datetime.datetime(2024, 11, 17, 8, 9, 35, 662000)}
 

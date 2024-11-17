@@ -77,6 +77,10 @@ def generate_trading_decision(result):
     ta_lib_data = result["ta_lib_data"]
     technical_analysis = result["technical_analysis"]
     orderbook = result["orderbook"]
+    average_price = result["average_price"]
+    min_price = result["min_price"]
+    max_price = result["max_price"]
+
 
     # Candlestick Pattern
     candlestick_pattern = None
@@ -128,10 +132,15 @@ def generate_trading_decision(result):
             "Hammer", "Three White Soldiers"
     ] and trend == "upward":
         if macd_condition and rsi_condition and ema_cross_above_50 and stochastic_cross_above and obv_increasing:
-            return "Strong Long"
+            # Additional check: current price should not be significantly above the average and max
+            if result["price_movement"]["latest_close"] <= average_price * 1.1 and \
+               result["price_movement"]["latest_close"] <= max_price * 1.1:  # Adjust thresholds as needed
+                return "Strong Long"
         elif (candlestick_pattern in ["Engulfing", "Harami", "Hammer"]
               and rsi_condition and obv_increasing):
-            return "Long"
+            # Additional check: current price should not be significantly above the average
+            if result["price_movement"]["latest_close"] <= average_price * 1.1:  # Adjust threshold as needed
+                return "Long"
         else:
             return "Hold (Potential Long)"
 
@@ -140,11 +149,16 @@ def generate_trading_decision(result):
             "Hanging Man", "Three Black Crows"
     ] and trend == "downward":
         if macd_condition and not rsi_condition and not ema_cross_above_50 and stochastic_cross_below and not obv_increasing:
-            return "Strong Short"
+            # Additional check: current price should not be significantly below the average and min
+            if result["price_movement"]["latest_close"] >= average_price * 0.9 and \
+               result["price_movement"]["latest_close"] >= min_price * 0.9:  # Adjust thresholds as needed
+                return "Strong Short"
         elif (candlestick_pattern
               in ["Engulfing", "Harami", "Hanging Man", "Shooting Star"]
               and not rsi_condition and not obv_increasing):
-            return "Short"
+            # Additional check: current price should not be significantly below the average
+            if result["price_movement"]["latest_close"] >= average_price * 0.9:  # Adjust threshold as needed
+                return "Short"
         else:
             return "Hold (Potential Short)"
 
