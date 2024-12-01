@@ -1,3 +1,4 @@
+import talib
 import requests
 import asyncio
 import numpy as np
@@ -43,6 +44,13 @@ def fetch_historical_data(symbol, interval, limit):
                 'taker_buy_base_asset_volume': float(kline[9]),
                 'taker_buy_quote_asset_volume': float(kline[10])
             }
+
+            closes = [float(k[4]) for k in data]  # Extract closing prices
+            entry['rsi'] = talib.RSI(np.array(closes), timeperiod=14)[-1]  # Calculate RSI and take the last value
+            entry['macd'], _, _ = talib.MACD(np.array(closes))  # Calculate MACD
+            # ... add other indicators (e.g., moving averages, Bollinger Bands)
+
+
             historical_data.append(entry)
 
         return historical_data
@@ -50,6 +58,27 @@ def fetch_historical_data(symbol, interval, limit):
     except requests.RequestException as e:
         print(f"Error fetching historical data: {e}")
         return None
+    
+def calculate_close_pct_change(historical_data):
+    """
+    Calculates the close percentage change for a list of historical data.
+
+    Args:
+      historical_data: A list of dictionaries, each containing historical 
+                        data for a specific time period.
+
+    Returns:
+      A list of floats representing the close percentage change for 
+      each time period.
+    """
+
+    close_pct_changes = []
+    for i in range(1, len(historical_data)):  # Start from the second entry
+        previous_close = historical_data[i-1]['close']
+        current_close = historical_data[i]['close']
+        pct_change = ((current_close - previous_close) / previous_close) * 100
+        close_pct_changes.append(pct_change)
+    return close_pct_changes
 
 def calculate_macd(df, fast_period=12, slow_period=24, signal_period=6):
     df['EMA_Fast'] = df['close'].ewm(span=fast_period, adjust=False).mean()

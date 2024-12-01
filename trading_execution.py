@@ -248,7 +248,7 @@ def close_positions_based_on_profit_loss(client, profit_threshold=0.0125, loss_t
 
 
         # Check if overall profit exceeds the threshold or if there are losses but total profit is positive
-        if overall_pnl_percentage >= 0.05:
+        if overall_pnl_percentage >= 0.005:
             for position in positions:
                 positionAmt = float(position.get('positionAmt', 0))
                 if positionAmt != 0:

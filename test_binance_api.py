@@ -5,6 +5,7 @@ import asyncio
 from binance.spot import Spot
 from dotenv import load_dotenv
 
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -124,24 +125,54 @@ def get_top_gainers(interval='15m', top_n=20):
     # Return the top N gainers
     return top_gainers[:top_n]
 
-# Get and print the top 20 gainers for the 15-minute interval
-# top_gainers_15m = get_top_gainers('15m', 20)
-# print(top_gainers_15m)
+def fetch_historical_data_for_scikitlearn(symbol, interval, limit):
+    """
+    Fetch historical candlestick data for a given symbol and interval from Binance API.
+
+    :param symbol: String, the symbol to fetch data for (e.g., 'BTCUSDT').
+    :param interval: String, the time interval (e.g., '15m' for 15 minutes).
+    :param limit: Integer, maximum number of data points to retrieve (default is 500).
+    :return: List of dictionaries with historical data or None if an error occurs.
+    """
+    base_url = "https://api.binance.com"
+    endpoint = "/api/v3/klines"
+    params = {
+        'symbol': symbol,
+        'interval': interval,
+        'limit': limit
+    }
+
+    try:
+        response = requests.get(base_url + endpoint, params=params)
+        response.raise_for_status()  # Raises an HTTPError for bad requests
+        data = response.json()
+
+        # Convert data to a more usable format
+        historical_data = []
+        for kline in data:
+            # entry = {
+            #     'open_time': kline[0],
+            #     'open': float(kline[1]),
+            #     'high': float(kline[2]),
+            #     'low': float(kline[3]),
+            #     'close': float(kline[4]),
+            #     'volume': float(kline[5]),
+            #     'close_time': kline[6],
+            #     'quote_asset_volume': float(kline[7]),
+            #     'number_of_trades': int(kline[8]),
+            #     'taker_buy_base_asset_volume': float(kline[9]),
+            #     'taker_buy_quote_asset_volume': float(kline[10])
+            # }
+            historical_data.append(kline)
+
+        return historical_data
+
+    except requests.RequestException as e:
+        print(f"Error fetching historical data: {e}")
+        return None
 
 
 
+data_scikitlearn = fetch_historical_data_for_scikitlearn("BTCUSDT","15m",10)
 
-
-
-# print(check_account_balance())
-
-print(check_OHLC("TOMOUSDT","1m"))
-
-# print(check_OHLC_history("BTCUSDT","1m"))
-
-
-
-
-
-
-
+print(data_scikitlearn)

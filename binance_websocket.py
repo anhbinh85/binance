@@ -18,6 +18,8 @@ from candle_stick_analysis import *
 from candle_stick_with_trend_line import Candle_Stick_Combine_Trend_Line
 from candle_stick_with_technical_indicators import TechnicalIndicators
 from volume_analysis import calculate_obv
+from sklearn.preprocessing import StandardScaler
+from train_scikitlearn import Price_prediction_by_Ai, transform_data
 
 # Load environment variables from .env file
 load_dotenv()
@@ -295,6 +297,7 @@ async def analyze_all_gainers_order_book(top_gainers):
         # Fetch Historical data
         historical_data = fetch_historical_data(symbol, interval, limit)
 
+        
         # Calculate price statistics
         lookback_period = 48
         average_price = np.mean([entry['close'] for entry in historical_data[-lookback_period:]])
@@ -316,12 +319,119 @@ async def analyze_all_gainers_order_book(top_gainers):
         # candle_stick_recognition = TA_Candle_Stick_Recognition(historical_data[-5:])
         # candle_stick_recognition.detect_patterns()
 
-        # Technical Indicatiors Analysis
+
+        #Scikitlearn
+
+        # Calculate the close percentage changes
+     
+        close_pct_changes = calculate_close_pct_change(historical_data)
+
+        # Add close_pct_change to EACH candlestick in historical_data
+        if len(historical_data) > 1:  
+            # Add close_pct_change to EACH candlestick in historical_data
+            for i, pct_change in enumerate(close_pct_changes):
+                historical_data[i + 1]['close_pct_change'] = pct_change
+        
+
+
+        # Technical Indicatiors Analysis apply with historical_data added in 'close_pct_change'
         print("Technical Indicatiors Analysis ...")
         ti = TechnicalIndicators(historical_data)
         technical_analysis = ti.execute()
 
+        # Calculate RSI values once
+        rsi_values = ti.calculate_rsi()  # Get the tuple of RSI arrays
 
+        print("rsi_values: ",rsi_values)
+
+        print("rsi_values[2]: ",rsi_values[2])
+
+        print("rsi_values[2][30]: ",rsi_values[2][30])
+
+        scaler = StandardScaler()
+
+        data_for_scaling = []
+        
+        # Determine the valid RSI data length (adjust 14 if using a different period)
+        valid_rsi_length = len(rsi_values[2]) - 14 + 1  
+        
+        # Use the minimum of valid_rsi_length and the length of historical_data[1:]
+        max_index = min(valid_rsi_length, len(historical_data[1:]))
+
+         # Iterate up to the maximum valid index
+        for i, d in enumerate(historical_data[1:][:max_index]):
+            if i < len(rsi_values[2]):  # Check if the RSI value exists for this index
+                rsi_value = rsi_values[2][i]  # Access the i-th element of RSI14
+            else:
+                print(f"Skipping RSI calculation for index {i} due to insufficient data.")
+                rsi_value = np.nan  # Or handle the error as needed
+
+            try:
+                macd_cross_above = ti.is_macd_line_cross_above_signal(d) 
+            except IndexError:
+                # print(f"Skipping MACD calculation for index {i} due to insufficient data.")
+                macd_cross_above = False  # Or handle the error as needed
+
+            # Append data only if RSI and close_pct_change are valid
+            if not np.isnan(rsi_value) and 'close_pct_change' in d:  
+                data_for_scaling.append([
+                    d['close_pct_change'], 
+                    rsi_value,
+                    1 if macd_cross_above else 0 
+                ])
+
+        # Fit the scaler ONLY if data_for_scaling is not empty
+        if data_for_scaling:
+            scaler.fit(data_for_scaling)  
+
+            # Transform the data ONLY if the scaler is fitted
+            current_features = transform_data([  # Use transform_data here
+                historical_data[-1]['close_pct_change'],
+                technical_analysis['RSI14'],  
+                technical_analysis['MACD_Line_cross_above_Signal']['cross_above']
+            ], scaler)
+
+        else:
+            print("No valid data for scaling. Skipping...")
+            # Assign NaN values directly (no need for transform_data here)
+            current_features = np.array([[np.nan, np.nan, np.nan]])  
+
+             
+        print("current_features: ", current_features)
+        
+        X_train, X_test, y_train, y_test = Price_prediction_by_Ai.prepare_data(historical_data)
+
+        # Scale the data (important for SVM)
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
+
+        # Train the models
+        try:
+            linear_model = Price_prediction_by_Ai.train_linear_regression(X_train, y_train)
+            logistic_model = Price_prediction_by_Ai.train_logistic_regression(X_train, y_train)
+            svm_model = Price_prediction_by_Ai.train_svm(X_train, y_train)
+
+            # # Predict using each model
+            try:
+                linear_prediction = Price_prediction_by_Ai.predict_price_movement(linear_model, [current_features[0]])
+            except Exception as e:
+                print(f"Error occurred in training linear_prediction model: {e}")
+
+            try:    
+                logistic_prediction = Price_prediction_by_Ai.predict_price_movement(logistic_model, [current_features[0]])
+            except Exception as e:
+                print(f"Error occurred in training logistic_prediction model: {e}")
+            
+            try:
+                svm_prediction = Price_prediction_by_Ai.predict_price_movement(svm_model, [current_features[0]])
+            except Exception as e:
+                print(f"Error occurred in training svm_prediction model: {e}")
+
+        except Exception as e:
+            print(f"Error occurred in training model: {e}")
+
+        
         # Candle_stick_with_trend_line:
         print("Candle stick with trend line ... using TA-LIB")
         print(f"Pattern Recognition from TA-LIB....for {symbol}")
@@ -449,7 +559,10 @@ async def analyze_all_gainers_order_book(top_gainers):
             "obv_values":obv_values,
             "average_price":average_price,
             "min_price":min_price,
-            "max_price":max_price
+            "max_price":max_price,
+            "linear_prediction":linear_prediction,
+            "logistic_prediction":logistic_prediction,
+            "svm_prediction":svm_prediction
         }
 
         trading_decision = generate_trading_decision(result) 
@@ -457,6 +570,12 @@ async def analyze_all_gainers_order_book(top_gainers):
         result["trading_decision"] = trading_decision
 
         print("Trading Decision: ", result["trading_decision"])
+
+        print("linear_prediction: ", result["linear_prediction"])
+
+        print("logistic_prediction: ", result["logistic_prediction"])
+
+        print("svm_prediction: ", result["svm_prediction"])
 
         results.append(result)
 
@@ -516,11 +635,11 @@ async def main():
             # Execute trading decisions based on the analysis and trading signal
             # Make sure to check your account balance and trading conditions before executing
             #################
-            for result in results:
-                print("signal for symbol: ", result['trading_signal']['Symbol'])
-                trading_decision = result["trading_decision"]
-                trade_response = execute_order_based_on_signal_and_balance(result['trading_signal'], client_binance, trading_decision)
-                print(f"Trade execution response: {trade_response}")
+            # for result in results:
+            #     print("signal for symbol: ", result['trading_signal']['Symbol'])
+            #     trading_decision = result["trading_decision"]
+            #     trade_response = execute_order_based_on_signal_and_balance(result['trading_signal'], client_binance, trading_decision)
+            #     print(f"Trade execution response: {trade_response}")
 
             # This function checks all your open positions and decides whether to close them
             # print("Start to check and close position...")

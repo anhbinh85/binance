@@ -66,6 +66,27 @@ class TechnicalIndicators:
         # Check for cross below condition
         cross_below = (data1[-2] > data2[-2]) and (data1[-1] < data2[-1])
         return {'cross_below': cross_below}
+    
+    def is_macd_line_cross_above_signal(self, candlestick):
+        """
+        Checks if the MACD line crosses above the signal line in the 
+        given candlestick data.
+
+        Args:
+          candlestick: A dictionary containing candlestick data, 
+                       including MACD values.
+
+        Returns:
+          True if MACD line crosses above signal line, False otherwise.
+        """
+
+        macd_line = candlestick['macd'][0]  # Assuming MACD is the first value in the 'macd' array
+        signal_line = candlestick['macd'][1] # Assuming Signal is the second value in the 'macd' array
+
+        # You might need to adjust the indices [0] and [1] 
+        # depending on how your MACD values are stored in the array
+
+        return (macd_line[-2] < signal_line[-2]) and (macd_line[-1] > signal_line[-1])
 
     def execute(self):
         # Execute analysis and print results
